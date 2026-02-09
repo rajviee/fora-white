@@ -479,10 +479,18 @@ class ForaTaskAPITester:
         # This will test the endpoint structure and authentication
         dummy_task_id = "507f1f77bcf86cd799439011"  # Valid ObjectId format
         
-        response = self.make_request('GET', f'task/{dummy_task_id}/history', auth_token=self.user_token)
-        
-        if not response:
-            self.log_test("Task Completion History", False, error_msg="Request failed")
+        # Debug: Test with direct request to see what's happening
+        try:
+            response = requests.get(
+                f"{self.base_url}/task/{dummy_task_id}/history",
+                headers={
+                    'Authorization': f'Bearer {self.user_token}',
+                    'Content-Type': 'application/json'
+                },
+                timeout=10
+            )
+        except requests.exceptions.RequestException as e:
+            self.log_test("Task Completion History", False, error_msg=f"Request exception: {str(e)}")
             return False
         
         # We expect either 200 with empty array or 404 for non-existent task

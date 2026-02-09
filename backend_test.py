@@ -515,16 +515,8 @@ class ForaTaskAPITester:
 def main():
     """Main test execution"""
     tester = ForaTaskAPITester()
-    
-    # Run only the tests needed to get tokens
-    print("🚀 Running prerequisite tests...")
-    tester.test_company_registration()
-    tester.test_user_login()
-    
-    # Now test payment creation
-    tester.test_payment_creation_503()
-    
-    return 0
+    success = tester.run_all_tests()
+    return 0 if success else 1
 
 if __name__ == "__main__":
     sys.exit(main())

@@ -76,17 +76,17 @@ class ForaTaskAPITester:
         
         try:
             if method.upper() == 'GET':
-                response = self.session.get(url, headers=request_headers, params=data)
+                response = self.session.get(url, headers=request_headers, params=data, timeout=10)
             elif method.upper() == 'POST':
-                response = self.session.post(url, json=data, headers=request_headers)
+                response = self.session.post(url, json=data, headers=request_headers, timeout=10)
             elif method.upper() == 'PATCH':
-                response = self.session.patch(url, json=data, headers=request_headers)
+                response = self.session.patch(url, json=data, headers=request_headers, timeout=10)
             else:
                 raise ValueError(f"Unsupported method: {method}")
             
             return response
         except requests.exceptions.RequestException as e:
-            print(f"Request error: {e}")
+            print(f"Request error for {method} {url}: {e}")
             return None
 
     def test_company_registration(self):

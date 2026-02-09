@@ -5,11 +5,17 @@ const Payment = require('../models/payment');
 const Company = require('../models/company');
 const User = require('../models/user');
 
-// Initialize Razorpay
-const razorpay = new Razorpay({
-    key_id: process.env.RAZORPAY_KEY_ID,
-    key_secret: process.env.RAZORPAY_KEY_SECRET
-});
+// Initialize Razorpay (only if keys are configured)
+let razorpay = null;
+const initRazorpay = () => {
+    if (process.env.RAZORPAY_KEY_ID && process.env.RAZORPAY_KEY_SECRET) {
+        razorpay = new Razorpay({
+            key_id: process.env.RAZORPAY_KEY_ID,
+            key_secret: process.env.RAZORPAY_KEY_SECRET
+        });
+    }
+};
+initRazorpay();
 
 // Constants
 const BASE_PLAN_PRICE = parseInt(process.env.BASE_PLAN_PRICE) || 249;

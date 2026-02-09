@@ -433,13 +433,20 @@ class ForaTaskAPITester:
             return False
         
         payment_data = {"userCount": 5}
-        response = self.make_request('POST', 'payment/create-order', data=payment_data, auth_token=self.user_token)
         
-        if not response:
-            # Try to debug the issue
-            print(f"Debug: User token exists: {bool(self.user_token)}")
-            print(f"Debug: Token preview: {self.user_token[:20] if self.user_token else 'None'}...")
-            self.log_test("Payment Creation 503", False, error_msg="Request failed")
+        # Make direct request to avoid session issues
+        try:
+            response = requests.post(
+                f"{self.base_url}/payment/create-order",
+                json=payment_data,
+                headers={
+                    'Authorization': f'Bearer {self.user_token}',
+                    'Content-Type': 'application/json'
+                },
+                timeout=10
+            )
+        except requests.exceptions.RequestException as e:
+            self.log_test("Payment Creation 503", False, error_msg=f"Request exception: {str(e)}")
             return False
         
         if response.status_code == 503:

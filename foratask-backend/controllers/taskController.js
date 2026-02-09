@@ -1289,6 +1289,106 @@ const searchTasks = async (req, res) => {
     }
 };
 
+// Get recurring task completion history
+const getTaskCompletionHistory = async (req, res) => {
+    try {
+        const taskId = req.params.id;
+        const userId = req.user.id;
+        const role = req.user.role;
+        const companyId = req.user.company;
+        const page = parseInt(req.query.page) || 0;
+        const limit = parseInt(req.query.limit) || 10;
+        const skip = page * limit;
 
+        // Verify task exists and user has access
+        const task = await Task.findById(taskId);
+        if (!task) {
+            return res.status(404).json({ message: 'Task not found' });
+        }
 
-module.exports = { createTask, getTask, createSubTask, deleteTask, getTaskList, deleteDocument, editTask, searchTasks, markAsCompleted };
+        // Check access
+        if (role !== 'admin') {
+            const hasAccess = task.assignees.map(String).includes(userId) ||
+                             task.observers.map(String).includes(userId) ||
+                             task.createdBy.toString() === userId;
+            if (!hasAccess) {
+                return res.status(403).json({ message: 'Access denied' });
+            }
+        }
+
+        // Get completion history
+        const TaskCompletionHistory = require('../models/taskCompletionHistory');
+        
+        const history = await TaskCompletionHistory.find({ task: taskId })
+            .populate('completedBy', 'firstName lastName email avatar')
+            .populate('approvedBy', 'firstName lastName email')
+            .sort({ completedAt: -1 })
+            .skip(skip)
+            .limit(limit);
+
+        const total = await TaskCompletionHistory.countDocuments({ task: taskId });
+
+        // Calculate statistics
+        const stats = await TaskCompletionHistory.aggregate([
+            { $match: { task: new mongoose.Types.ObjectId(taskId) } },
+            {
+                $group: {
+                    _id: null,
+                    totalCompletions: { $sum: 1 },
+                    onTimeCompletions: {
+                        $sum: { $cond: ['$completedOnTime', 1, 0] }
+                    },
+                    avgDaysOverdue: { $avg: '$daysOverdue' }
+                }
+            }
+        ]);
+
+        const completionStats = stats[0] || {
+            totalCompletions: 0,
+            onTimeCompletions: 0,
+            avgDaysOverdue: 0
+        };
+
+        res.status(200).json({
+            success: true,
+            task: {
+                id: task._id,
+                title: task.title,
+                taskType: task.taskType,
+                recurringSchedule: task.recurringSchedule
+            },
+            history: history.map(h => ({
+                id: h._id,
+                completedBy: h.completedBy,
+                completedAt: h.completedAt,
+                statusAtCompletion: h.statusAtCompletion,
+                originalDueDate: h.originalDueDate,
+                completedOnTime: h.completedOnTime,
+                daysOverdue: h.daysOverdue,
+                cycleNumber: h.cycleNumber,
+                approvedBy: h.approvedBy,
+                approvedAt: h.approvedAt,
+                wasAutoApproved: h.wasAutoApproved,
+                completionNotes: h.completionNotes
+            })),
+            stats: {
+                totalCompletions: completionStats.totalCompletions,
+                onTimeCompletions: completionStats.onTimeCompletions,
+                onTimePercentage: completionStats.totalCompletions > 0 
+                    ? ((completionStats.onTimeCompletions / completionStats.totalCompletions) * 100).toFixed(1)
+                    : 0,
+                avgDaysOverdue: completionStats.avgDaysOverdue?.toFixed(1) || 0
+            },
+            pagination: {
+                total,
+                page,
+                limit,
+                totalPages: Math.ceil(total / limit)
+            }
+        });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+};
+
+module.exports = { createTask, getTask, createSubTask, deleteTask, getTaskList, deleteDocument, editTask, searchTasks, markAsCompleted, getTaskCompletionHistory };

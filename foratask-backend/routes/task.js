@@ -1,6 +1,6 @@
 const express = require("express");
 const router = express.Router();
-const { createTask, getTask,createSubTask,deleteTask,getTaskList, deleteDocument, editTask, searchTasks, markAsCompleted } = require("../controllers/taskController");
+const { createTask, getTask,createSubTask,deleteTask,getTaskList, deleteDocument, editTask, searchTasks, markAsCompleted, getTaskCompletionHistory } = require("../controllers/taskController");
 const upload = require("../middleware/uploadMiddleware");
 
 router.post("/add-task" ,upload.array("file", 3), createTask);
@@ -12,5 +12,6 @@ router.patch('/markAsCompleted', markAsCompleted);
 router.delete('/:id/documents/:docId',deleteDocument);
 router.patch('/edit/:id',upload.array("file",3),editTask);
 router.get('/search',searchTasks);
+router.get('/:id/history', getTaskCompletionHistory);
 router.get('/:id',getTask);
 module.exports = router;

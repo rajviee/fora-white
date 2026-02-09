@@ -1,0 +1,1701 @@
+**FORATASK TECHNICAL DOCUMENTATION**
+
+Last Updated: February 5, 2026
+
+Purpose: Complete system documentation for developers and AI assistants
+
+===============================================
+
+TABLE OF CONTENTS
+
+===============================================
+
+1. Core Concepts - Self vs Team Tasks
+2. Architecture & Tech Stack
+3. Frontend Documentation
+4. Backend Documentation
+5. Database & Schema
+6. SaaS Implementation Guide
+
+===============================================
+
+QUICK REFERENCE
+
+===============================================
+
+TECH STACK SUMMARY:
+
+- Backend: Node.js, Express v5.1.0, MongoDB, [Socket.io](http://Socket.io) v4.8.1
+- Frontend: React Native v0.81.5, Expo v54, TailwindCSS
+- Auth: JWT with bcrypt
+
+KEY CONCEPTS:
+
+- Self Tasks: Private tasks (one person is both assignee and observer)
+- Team Tasks: Shared tasks (multiple people or assignee ≠ observer)
+- Multi-tenant SaaS: Company-based data isolation
+- Real-time: [Socket.io](http://Socket.io) for live updates
+
+QUICK START:
+
+Backend:
+
+cd foratask-backend
+
+npm install
+
+npm run dev
+
+Frontend:
+
+cd foratask-frontend
+
+npm install
+
+npm start
+
+ENVIRONMENT VARIABLES:
+
+Backend (.env):
+
+- JWT_SECRET, MONGO_URI, PORT
+- RAZORPAY_KEY_ID, RAZORPAY_KEY_SECRET
+
+Frontend (.env):
+
+- EXPO_PUBLIC_API_URL
+- EXPO_PUBLIC_RAZORPAY_KEY_ID
+
+===============================================
+
+1. CORE CONCEPTS - SELF VS TEAM TASKS
+
+===============================================
+
+CRITICAL CONCEPT: SELF TASK vs TEAM TASK LOGIC
+
+The application has a FUNDAMENTAL distinction between "Self Tasks" and "Team Tasks". This `isSelfTask` flag controls task visibility, filtering, permissions, and reporting throughout the entire system.
+
+WHAT IS A SELF TASK? (isSelfTask=true)
+
+A task where:
+
+- Exactly ONE assignee AND exactly ONE observer
+- Both are the SAME person (the task creator)
+- Automatically calculated at creation:
+
+const selfTask = assignees.length === 1 && observers.length === 1 &&
+
+assignees[0] === [req.user.id](http://req.user.id) && observers[0] === [req.user.id](http://req.user.id);
+
+task.isSelfTask = selfTask;
+
+Example: Admin creates "Buy groceries" and assigns it only to themselves
+
+WHAT IS A TEAM TASK? (isSelfTask=false)
+
+A task where:
+
+- Multiple assignees, OR
+- Multiple observers, OR
+- Assignee ≠ observer (different people)
+
+Example: Admin creates "Complete Q1 report" assigned to 3 employees with Admin as the observer
+
+WHY THIS DISTINCTION EXISTS:
+
+1. PRIVACY: Self tasks are completely private to the creator
+2. ORGANIZATION: Separates personal tasks from team collaboration work
+3. REPORTING: Completely separate report views for self vs team tasks
+4. FILTERING: Users toggle between viewing their personal tasks vs team tasks
+
+BACKEND LOGIC IMPLEMENTATION:
+
+Task Creation:
+
+- taskController.createTask
+- Automatically calculates isSelfTask based on assignees/observers
+- Stores boolean flag in task document
+
+Task Retrieval:
+
+- taskController.getTaskList
+- Frontend sends query parameter: ?isSelfTask=true OR ?isSelfTask=false
+- Backend filters completely differently based on this flag
+
+For SELF TASKS (isSelfTask=true):
+
+Database Query: {
+
+isSelfTask: true,
+
+createdBy: userId,      // ONLY creator can see their self tasks
+
+company: companyId
+
+}
+
+Result: User sees ONLY their own personal tasks
+
+For TEAM TASKS (isSelfTask=false):
+
+If user is ADMIN:
+
+Database Query: {
+
+isSelfTask: false,
+
+company: companyId    // Admin sees ALL company team tasks
+
+}
+
+Result: Admin sees all team tasks in the company
+
+If user is EMPLOYEE/SUPERVISOR:
+
+Database Query: {
+
+isSelfTask: false,
+
+company: companyId,
+
+$or: [
+
+{ assignees: userId },
+
+{ observers: userId },
+
+{ createdBy: userId }
+
+]
+
+}
+
+Result: Employee sees only team tasks they're involved in
+
+FRONTEND BEHAVIOR:
+
+- Dashboard and Task screens have "Self" vs "Team" toggle/tabs
+- Clicking "Self" sends API request with ?isSelfTask=true
+- Clicking "Team" sends API request with ?isSelfTask=false
+- User sees COMPLETELY DIFFERENT task lists based on this flag
+
+PERMISSION RULES:
+
+SELF TASKS:
+
+- Creator: Full access (view, edit, delete, complete)
+- Everyone else: CANNOT see the task at all
+
+TEAM TASKS:
+
+- Admin: Can view, edit, delete ALL company team tasks
+- Observer: Can view task, approve/reject task completion
+- Assignee: Can view, edit (limited fields), mark as complete
+- Creator: Can view, cannot edit unless they are Observer
+- Other users: Cannot see tasks they're not part of
+
+TASK COMPLETION WORKFLOW:
+
+SELF TASK Completion:
+
+1. Creator marks task as complete
+2. Status IMMEDIATELY becomes "Completed" (no approval needed)
+
+TEAM TASK Completion (by Assignee):
+
+1. Assignee marks task as complete
+2. Status becomes "For Approval"
+3. Notification sent to ALL observers
+4. Observer approves → Status becomes "Completed"
+5. Observer rejects → Status returns to Pending
+
+TEAM TASK Completion (by Observer or Admin):
+
+1. Observer/Admin marks task as complete
+2. Status IMMEDIATELY becomes "Completed"
+
+REPORTING & STATISTICS:
+
+- Admin Report: Shows ONLY Team Tasks (isSelfTask=false)
+- Self Report: Shows ONLY Self Tasks (isSelfTask=true)
+- Dashboard Statistics: Calculated separately for Self and Team tasks
+
+IMPORTANT EDGE CASES:
+
+1. Admin creating task for only themselves = Self Task
+2. Editing a Team Task doesn't auto-convert to Self Task
+3. Self Tasks do NOT appear in Admin's team task view
+4. Cannot convert Self Task to Team Task after creation
+5. isSelfTask parameter MUST be specified in API calls
+
+CODE LOCATIONS:
+
+Backend:
+
+- controllers/taskController.js → createTask(), getTaskList()
+- controllers/reportController.js → selfReportSummary(), adminReportSummary()
+- controllers/statsController.js (all functions use isSelfTask parameter)
+
+Frontend:
+
+- screens/Dashboard.js
+- screens/Task/TaskList.js
+- screens/Reports/
+
+===============================================
+
+1. ARCHITECTURE & TECH STACK
+
+===============================================
+
+HIGH-LEVEL SYSTEM ARCHITECTURE:
+
+CLIENT LAYER
+
+┌──────────┐   ┌──────────┐   ┌──────────┐
+
+│ Web App  │   │ iOS App  │   │Android App│
+
+│(Expo Web)│   │  (RN)    │   │   (RN)    │
+
+└──────────┘   └──────────┘   └──────────┘
+
+↓
+
+HTTP/REST + WebSocket
+
+↓
+
+API GATEWAY LAYER
+
+Express.js Server (Port 3000)
+
+Middleware: CORS, Auth, Cookie Parser, Multer
+
+↓
+
+┌────────────────┼────────────────┐
+
+↓                ↓                ↓
+
+REST Routes      [Socket.io](http://Socket.io)        Cron Jobs
+
+/auth, /task    Real-time       Schedulers
+
+/me, /stats     Events
+
+↓                ↓
+
+└────────────────┘
+
+↓
+
+BUSINESS LOGIC LAYER
+
+Controllers (taskController.js, etc)
+
+↓
+
+DATA ACCESS LAYER
+
+Mongoose Models & Schemas
+
+↓
+
+DATABASE LAYER
+
+MongoDB (foratask Database)
+
+Collections: users, tasks, companies, notifications
+
+TECH STACK:
+
+Backend:
+
+- Runtime: Node.js (v18+ recommended)
+- Framework: Express.js v5.1.0
+- Database: MongoDB with Mongoose ODM v8.18.0
+- Authentication: JWT (jsonwebtoken v9.0.2) with bcrypt
+- Real-time: [Socket.io](http://Socket.io) v4.8.1
+- File Upload: Multer v2.0.2
+- Scheduled Jobs: node-cron v4.2.1
+- Environment Management: dotenv v17.2.2
+
+Frontend:
+
+- Framework: React Native v0.81.5 with Expo v54
+- UI Library: React v19.1.0
+- Navigation: React Navigation v7
+- Styling: NativeWind v4.1.23 (TailwindCSS)
+- State Management: Zustand v5.0.8
+- Data Fetching: TanStack React Query v5.90.11 + Axios v1.12.2
+- UI Components: React Native Paper v5.14.5, Lucide React Native icons
+- Storage: Expo Secure Store, AsyncStorage
+- Push Notifications: Expo Notifications
+- Real-time: [Socket.io](http://Socket.io) Client v4.7.2
+
+AUTHENTICATION FLOW:
+
+1. User Login Request → POST /auth/login {email, password}
+2. Store Token → Expo SecureStore
+3. Authenticated Requests → Headers: {Authorization: "Bearer <token>"}
+4. Token Verification → JWT verification, attach to req.user
+5. Protected Routes → All routes except /auth/* require authMiddleware
+
+REAL-TIME COMMUNICATION ([Socket.io](http://Socket.io)):
+
+1. Connection: Client connects on app load
+2. Register User: socket.emit("registerUser", userId)
+3. Server maps: connectedUsers[userId] = [socket.id](http://socket.id)
+4. Real-time Events: Task assignments, notifications, status changes
+5. Disconnection: Remove from connectedUsers map
+
+DATA FLOW - TASK CREATION:
+
+AddTask Screen (Frontend)
+
+↓
+
+Form Data + File Attachments
+
+↓
+
+POST /task/add-task (multipart/form-data)
+
+↓
+
+taskController.createTask()
+
+├─> Process file uploads (Multer)
+
+├─> Calculate reminder times
+
+├─> Create Task in MongoDB
+
+├─> Create Notification documents
+
+└─> Emit [Socket.io](http://Socket.io) event to assignees
+
+↓
+
+Response: {task, message}
+
+↓
+
+React Query invalidates cache
+
+↓
+
+Task list auto-refreshes
+
+TARGET PLATFORMS:
+
+- Web Application: React-based web app using Expo Web
+- Mobile Application: React Native mobile apps for iOS and Android
+- Unified Codebase: Single React Native codebase serves both platforms
+
+===============================================
+
+1. FRONTEND DOCUMENTATION
+
+===============================================
+
+PROJECT STRUCTURE:
+
+foratask-frontend/
+
+├── src/
+
+│   ├── App.js                    # Root component with navigation
+
+│   ├── components/               # Reusable UI components (20 files)
+
+│   │   ├── TaskCard.js
+
+│   │   ├── UserAvatar.js
+
+│   │   ├── CustomButton.js
+
+│   │   └── ...
+
+│   ├── screens/                  # Screen components (25 files)
+
+│   │   ├── LoginScreen.js
+
+│   │   ├── Dashboard.js
+
+│   │   ├── Task/
+
+│   │   │   ├── TaskList.js
+
+│   │   │   ├── AddTask.js
+
+│   │   │   ├── TaskDetails.js
+
+│   │   │   ├── EditTask.js
+
+│   │   │   └── SubTask.js
+
+│   │   ├── Employees/
+
+│   │   │   ├── EmployeesList.js
+
+│   │   │   ├── AddEmployee.js
+
+│   │   │   ├── EmployeeDetails.js
+
+│   │   │   └── EmployeeTaskList.js
+
+│   │   ├── Reports/
+
+│   │   │   ├── ReportsList.js
+
+│   │   │   ├── AdminReport.js
+
+│   │   │   ├── EmployeeReport.js
+
+│   │   │   ├── TimelineReport.js
+
+│   │   │   ├── RecurringReport.js
+
+│   │   │   ├── PriorityReport.js
+
+│   │   │   ├── RejectionReport.js
+
+│   │   │   └── Performance.js
+
+│   │   ├── NotificationPage.js
+
+│   │   ├── Profile.js
+
+│   │   ├── Settings.js
+
+│   │   └── Discussion.js
+
+│   ├── navigation/               # Navigation configuration
+
+│   │   ├── BottomTabNavigator.js
+
+│   │   ├── SidebarNavigator.js
+
+│   │   └── navigationRef.js
+
+│   ├── stores/                   # State management
+
+│   │   └── useUserStore.js
+
+│   └── utils/                    # Utilities
+
+│       ├── api.js
+
+│       ├── secureStorage.js
+
+│       ├── Context/
+
+│       │   ├── DashboardContext.js
+
+│       │   └── RouteContext.js
+
+│       └── socket/
+
+│           └── socketManager.js
+
+├── assets/
+
+├── global.css
+
+├── tailwind.config.js
+
+├── app.json
+
+└── package.json
+
+COMPONENT HIERARCHY:
+
+App (Root)
+
+└── NavigationContainer
+
+├── LoginScreen (Unauthenticated)
+
+└── Main (Authenticated)
+
+├── BottomTabNavigator (Mobile, width < 1024px)
+
+│   ├── Dashboard
+
+│   ├── Task Stack
+
+│   ├── Notification
+
+│   └── Profile
+
+│
+
+└── SidebarNavigator (Web, width >= 1024px)
+
+├── Sidebar (Drawer)
+
+└── Content Stack
+
+├── Dashboard
+
+├── Task Stack
+
+├── Employees Stack
+
+├── Reports Stack
+
+├── Notification
+
+├── Discussion
+
+├── Settings
+
+└── Profile
+
+STATE MANAGEMENT:
+
+Zustand Store (useUserStore.js):
+
+{
+
+user: null | UserObject,
+
+isLoading: boolean,
+
+error: string | null,
+
+isInitialized: boolean,
+
+// Actions
+
+initializeStore: async () => {},
+
+login: async (credentials) => {},
+
+logout: async () => {},
+
+fetchUser: async () => {},
+
+isAuthenticated: () => boolean,
+
+clearError: () => {}
+
+}
+
+React Query (TanStack Query):
+
+- Used for server state management
+- Automatic caching, refetching, and background updates
+
+Context API:
+
+- DashboardContext: Shares dashboard data
+- RouteContext: Tracks current route for navigation
+
+ROUTING STRUCTURE:
+
+/login → LoginScreen
+
+/dashboard → Dashboard
+
+/task → TaskList
+
+/task/add → AddTask
+
+/task/:id → TaskDetails
+
+/employees → EmployeesList
+
+/employees/add → AddEmployee
+
+/employees/:id → EmployeeDetails
+
+/reports → ReportsList
+
+/reports/admin-report → AdminReport
+
+/reports/employee-report → EmployeeReport
+
+/notification → NotificationPage
+
+/discussion → Discussion
+
+/settings → Settings
+
+/profile → Profile
+
+KEY UI COMPONENTS:
+
+- TaskCard: Displays task summary
+- UserAvatar: Shows user profile picture
+- CustomButton: Styled button with loading states
+- DateTimePicker: Cross-platform date/time selection
+- DropdownPicker: Select dropdown for priorities, statuses
+- NotificationCard: Displays notification with actions
+- StatCard: Dashboard statistics display
+- ChartComponents: Various charts (pie, bar, line)
+
+MOBILE VS WEB:
+
+Responsive Layout:
+
+const { width } = useWindowDimensions();
+
+const isMobile = width < 1024;
+
+{isMobile ? <MobileView /> : <WebView />}
+
+Platform-Specific Code:
+
+import { Platform } from 'react-native';
+
+if (Platform.OS === 'web') {
+
+// Web-specific code
+
+} else {
+
+// Mobile-specific code
+
+}
+
+DEVELOPMENT SETUP:
+
+# Navigate to frontend directory
+
+cd foratask-frontend
+
+# Install dependencies
+
+npm install
+
+# Configure environment variables
+
+# Create .env file with:
+
+EXPO_PUBLIC_API_URL=http://192.168.0.101:3000
+
+EXPO_PUBLIC_ENCRYPT_KEY=forataskencryptkey
+
+EXPO_PUBLIC_SIGN_KEY=foratasksignkey
+
+# Start Expo development server
+
+npm start
+
+# Run on web
+
+npm run web
+
+# Run on Android
+
+npm run android
+
+# Run on iOS
+
+npm run ios
+
+===============================================
+
+1. BACKEND DOCUMENTATION
+
+===============================================
+
+PROJECT STRUCTURE:
+
+foratask-backend/
+
+├── server.js                     # Main entry point with [Socket.io](http://Socket.io)
+
+├── index.js                      # Basic server starter
+
+├── config/                       # Configuration files
+
+├── controllers/                  # Business logic (6 files)
+
+│   ├── adminController.js
+
+│   ├── taskController.js
+
+│   ├── userController.js
+
+│   ├── notificationController.js
+
+│   ├── statsController.js
+
+│   └── reportController.js
+
+├── models/                       # Mongoose schemas (7 files)
+
+│   ├── user.js
+
+│   ├── company.js
+
+│   ├── task.js
+
+│   ├── subtask.js
+
+│   ├── notification.js
+
+│   ├── message.js
+
+│   └── recurringTask.js
+
+├── routes/                       # API route definitions (7 files)
+
+│   ├── auth.js
+
+│   ├── user.js
+
+│   ├── task.js
+
+│   ├── admin.js
+
+│   ├── stats.js
+
+│   ├── report.js
+
+│   └── notification.js
+
+├── middleware/                   # Express middleware (3 files)
+
+│   ├── authMiddleware.js
+
+│   ├── uploadMiddleware.js
+
+│   └── uploadAvatarMiddleware.js
+
+├── uploads/                      # Uploaded files storage
+
+│   ├── documents/
+
+│   └── avatars/
+
+├── utils/
+
+├── .env
+
+└── package.json
+
+API ENDPOINTS:
+
+Authentication Routes (/auth):
+
+- POST /auth/login - User login
+    
+    Body: {email, password}
+    
+    Response: {token, message}
+    
+- POST /auth/register - Company & admin registration
+    
+    Body: {email, password, firstName, lastName, companyEmail, companyName, etc}
+    
+    Response: {userId, companyId, subscriptionId, message}
+    
+
+User Routes (/me - Protected):
+
+- GET /me/userinfo - Get current user info
+- PATCH /me/update-user/:id - Update user profile
+- DELETE /me/delete-user/:id - Delete user account
+- GET /me/usersList - Get all users in company
+- POST /me/save-token - Save Expo push token
+- DELETE /me/remove-token - Remove push token
+- PATCH /me/reset-password/:id - Reset user password
+
+Task Routes (/task - Protected):
+
+- POST /task/add-task - Create new task
+- POST /task/add-sub-task - Create subtask
+- GET /task/getTaskList - Get filtered task list
+- GET /task/:id - Get single task details
+- PATCH /task/edit/:id - Update task
+- DELETE /task/delete-task/:id - Delete task
+- PATCH /task/markAsCompleted - Mark task completed
+- DELETE /task/:id/documents/:docId - Delete task document
+- GET /task/search - Search tasks
+
+Admin Routes (/ - Protected):
+
+- GET /emp-list - Get employees list
+- POST /assign-employee/:id - Assign employee to supervisor
+- POST /unassign-employee/:id - Unassign employee
+- POST /add-employee - Add new employee
+- GET /get-employee-tasks - Get tasks for employees
+
+Stats Routes (/stats - Protected):
+
+- GET /stats/tasks-summary - Get task statistics summary
+- GET /stats/todaysTasks - Get today's tasks
+- GET /stats/statisticsGraph - Get data for charts
+
+Reports Routes (/reports - Protected):
+
+- GET /reports/admin-report-summary - Admin report summary
+- GET /reports/self-report-summary - Employee self-report
+
+Notification Routes (/notifications - Protected):
+
+- GET /notifications/getAllNotifications - Get all notifications
+- GET /notifications/unreadCount - Get unread count
+- PATCH /notifications/handleTaskApproval/:id - Approve/reject task
+
+MIDDLEWARE:
+
+authMiddleware.js:
+
+- JWT token verification
+- Extracts token from Authorization: Bearer <token>
+- Verifies token and attaches decoded user to req.user
+- Used on all routes except /auth/*
+
+uploadMiddleware.js:
+
+- Multer configuration for document uploads
+- Accepts: .png, .jpg, .jpeg, .pdf, .doc, .docx, .txt
+- Max 3 files per request
+- Stores in ./uploads/documents/
+
+uploadAvatarMiddleware.js:
+
+- Multer configuration for avatar uploads
+- Accepts: .png, .jpg, .jpeg
+- Single file upload
+- Stores in ./uploads/avatars/
+
+CONTROLLERS ARCHITECTURE:
+
+- Separation of Concerns: Routes handle HTTP, controllers handle business logic
+- Error Handling: Try-catch blocks with appropriate HTTP status codes
+- Validation: Input validation before database operations
+- Population: Mongoose .populate() for related documents
+
+taskController.js Key Functions:
+
+- createTask() - Create task with notifications
+- getTask() - Fetch single task with populated fields
+- getTaskList() - Get filtered, paginated task list
+- editTask() - Update task and handle status changes
+- deleteTask() - Soft/hard delete task
+- markAsCompleted() - Mark task completed, notify observers
+- createSubTask() - Create subtask linked to parent
+- deleteDocument() - Remove document from task
+- searchTasks() - Full-text search across tasks
+
+EXTERNAL SERVICES:
+
+Expo Push Notifications:
+
+- Used in notificationController.js
+- Sends bulk push notifications to mobile devices
+- Uses Expo's push notification service
+- Requires expoPushToken stored in user document
+
+[Socket.io](http://Socket.io) Events:
+
+- Real-time events
+- [io.to](http://io.to)(socketId).emit("newNotification", data)
+- [io.to](http://io.to)(socketId).emit("taskUpdated", task)
+- Managed via [global.io](http://global.io) and global.connectedUsers
+
+CRON JOBS:
+
+Every Minute - Overdue Task Detection:
+
+- Marks tasks as overdue and creates notifications
+- Finds tasks past due date but not completed/overdue
+- Updates status to "Overdue"
+- Creates notifications for assignees and observers
+
+Every Minute - Reminder Notifications:
+
+- Sends scheduled reminder notifications
+- Finds tasks with reminders due
+- Creates "reminder" notifications
+- Sends push notifications in bulk
+
+Daily at Midnight - Recurring Tasks Reset:
+
+- Resets completed recurring tasks for next cycle
+- Calculates next due date based on schedule
+- Resets status to "Pending"
+- Adjusts notification times
+
+DEVELOPMENT SETUP:
+
+# Navigate to backend directory
+
+cd foratask-backend
+
+# Install dependencies
+
+npm install
+
+# Configure environment variables
+
+# Create .env file with:
+
+JWT_SECRET=jwt-token-foratask
+
+PORT=3000
+
+MONGO_URI=mongodb://127.0.0.1:27017/foratask
+
+NODE_ENV=production
+
+UPLOAD_PATH=./uploads/documents
+
+# Start MongoDB
+
+mongod
+
+# Run development server
+
+npm run dev
+
+# Run production server
+
+npm start
+
+===============================================
+
+1. DATABASE & SCHEMA
+
+===============================================
+
+DATABASE INFO:
+
+- Database: MongoDB
+- Version: 5.0+ recommended
+- ORM: Mongoose v8.18.0
+- Connection: mongodb://127.0.0.1:27017/foratask
+
+COMPLETE SCHEMA:
+
+Users Collection:
+
+{
+
+_id: ObjectId,
+
+email: String (unique, required, validated),
+
+password: String (hashed, required, min 8 chars),
+
+firstName: String (required, max 50 chars),
+
+lastName: String (required, max 50 chars),
+
+subordinates: [ObjectId] (ref: User),
+
+supervisor: ObjectId (ref: User),
+
+avatar: {
+
+filename: String,
+
+originalName: String,
+
+path: String,
+
+size: Number,
+
+mimeType: String,
+
+fileExtension: String (enum: ['.png', '.jpg', '.jpeg', null]),
+
+uploadedAt: Date
+
+},
+
+contactNumber: String (validated international format),
+
+dateOfBirth: Date,
+
+gender: String (enum: ['male', 'female', 'other', 'prefer-not-to-say']),
+
+role: String (enum: ['master-admin', 'admin', 'employee', 'supervisor'], default: 'employee'),
+
+designation: String,
+
+expoPushToken: String,
+
+company: ObjectId (ref: Company, required),
+
+createdAt: Date (auto),
+
+updatedAt: Date (auto)
+
+}
+
+Companies Collection:
+
+{
+
+_id: ObjectId,
+
+companyEmail: String (unique, required, validated),
+
+companyName: String (required),
+
+companyAddress: String (required),
+
+companyGSTNumber: String (optional, validated format),
+
+companyPANNumber: String (optional, validated format),
+
+owners: [ObjectId] (ref: User),
+
+employees: [ObjectId] (ref: User),
+
+companyContactNumber: String (required, validated),
+
+subscription: ObjectId (ref: Subscription),
+
+maxUsers: Number (default: null),
+
+currentPlanUserCount: Number (default: 1),
+
+isActive: Boolean (default: true),
+
+createdAt: Date (auto),
+
+updatedAt: Date (auto)
+
+}
+
+Tasks Collection:
+
+{
+
+_id: ObjectId,
+
+title: String (required, max 300 chars),
+
+description: String (max 2000 chars),
+
+assignees: [ObjectId] (ref: User, required),
+
+createdBy: ObjectId (ref: User),
+
+observers: [ObjectId] (ref: User, required),
+
+dueDateTime: Date (required),
+
+priority: String (enum: ['High', 'Medium', 'Low'], default: 'Medium'),
+
+status: String (enum: ['Completed', 'In Progress', 'Pending', 'Overdue', 'For Approval'], default: 'Pending'),
+
+taskType: String (enum: ['Single', 'Recurring'], default: 'Single'),
+
+isSelfTask: Boolean (default: false),
+
+recurringSchedule: String (enum: ['Daily', 'Weekly', 'Monthly', '3-Months']),
+
+reminder: Date,
+
+subTask: ObjectId (ref: Subtask),
+
+repeatReminder: [String] (enum: ['10m', '30m', '1h', '1d', '1w']),
+
+notification: [{
+
+date: Date,
+
+notifId: ObjectId (ref: Notification),
+
+type: String
+
+}],
+
+company: ObjectId (ref: Company, required),
+
+documents: [{
+
+filename: String,
+
+originalName: String,
+
+path: String,
+
+size: Number,
+
+mimeType: String,
+
+fileExtension: String (enum: ['.png', '.jpg', '.jpeg', '.pdf', '.doc', '.docx', '.txt']),
+
+uploadedAt: Date (default: now),
+
+uploadedBy: ObjectId (ref: User)
+
+}],
+
+createdAt: Date (auto),
+
+updatedAt: Date (auto)
+
+}
+
+Subtasks Collection:
+
+{
+
+_id: ObjectId,
+
+title: String,
+
+description: String,
+
+assignees: [ObjectId] (ref: User, required),
+
+createdBy: ObjectId (ref: User),
+
+parentTaskId: ObjectId (ref: Task),
+
+isSelfTask: Boolean (default: false),
+
+observers: [ObjectId] (ref: User, required),
+
+dueDateTime: Date,
+
+priority: String (enum: ['High', 'Medium', 'Low'], default: 'Medium'),
+
+status: String (enum: ['Completed', 'In Progress', 'Pending', 'Overdue'], default: 'Pending'),
+
+createdAt: Date (auto),
+
+updatedAt: Date (auto)
+
+}
+
+Notifications Collection:
+
+{
+
+_id: ObjectId,
+
+userId: ObjectId (ref: User, required),
+
+message: String (required),
+
+taskId: ObjectId (ref: Task),
+
+type: String (enum: ['taskApproval', 'taskRejected', 'system', 'reminder', 'Overdue'], default: 'system'),
+
+isRead: Boolean (default: false),
+
+isSend: Boolean (default: false),
+
+resolved: Boolean (default: false),
+
+reminderTime: Date,
+
+createdAt: Date (default: now),
+
+expiresAt: Date (default: now + 2 days),
+
+action: {
+
+options: [String],
+
+chosen: String (enum: ['approve', 'reject', null])
+
+},
+
+dueDateTime: Date (ref: Task),
+
+company: ObjectId (ref: Company, required)
+
+}
+
+Messages Collection:
+
+{
+
+_id: ObjectId,
+
+userId: ObjectId (ref: User),
+
+message: String,
+
+company: ObjectId (ref: Company)
+
+}
+
+RecurringTasks Collection:
+
+{
+
+_id: ObjectId,
+
+taskId: ObjectId (ref: Task),
+
+frequency: String (enum: ['Daily', 'Weekly', 'Monthly', '3-Months']),
+
+lastExecuted: Date,
+
+nextExecution: Date,
+
+isActive: Boolean
+
+}
+
+ENTITY RELATIONSHIPS:
+
+Company
+
+│
+
+├──< owns >──── User (owners[])
+
+├──< employs >── User (employees[])
+
+└──< has >────── Task (company)
+
+Notification (company)
+
+User
+
+│
+
+├──< creates >──── Task (createdBy)
+
+├──< assigned to >── Task (assignees[])
+
+├──< observes >───── Task (observers[])
+
+├──< supervises >─── User (subordinates[])
+
+├──< reports to >─── User (supervisor)
+
+├──< uploads >────── Document (uploadedBy)
+
+└──< receives >───── Notification (userId)
+
+Task
+
+│
+
+├──< has >───────── Subtask (parentTaskId)
+
+├──< contains >──── Document (documents[])
+
+├──< triggers >──── Notification (taskId)
+
+└──< linked to >─── Notification (notification[].notifId)
+
+RELATIONSHIP TYPES:
+
+One-to-Many:
+
+- Company → Users
+- Company → Tasks
+- User → Tasks Created
+- Task → Documents
+- Task → Notifications
+- Task → Subtasks
+
+Many-to-Many:
+
+- Task ↔ Users (assignees)
+- Task ↔ Users (observers)
+- User ↔ User (supervisors/subordinates)
+
+DATABASE INDEXES:
+
+Users:
+
+users.createIndex({ email: 1 }, { unique: true })
+
+users.createIndex({ company: 1 })
+
+users.createIndex({ role: 1 })
+
+Tasks:
+
+tasks.createIndex({ company: 1 })
+
+tasks.createIndex({ assignees: 1 })
+
+tasks.createIndex({ status: 1 })
+
+tasks.createIndex({ dueDateTime: 1 })
+
+tasks.createIndex({ createdAt: -1 })
+
+Notifications:
+
+notifications.createIndex({ userId: 1 })
+
+notifications.createIndex({ isRead: 1 })
+
+notifications.createIndex({ expiresAt: 1 }) // TTL index
+
+Companies:
+
+companies.createIndex({ companyEmail: 1 }, { unique: true })
+
+MODEL VALIDATIONS:
+
+User Model:
+
+- email: Required, unique, email format, lowercase
+- password: Required, min 8 chars, hashed with bcrypt
+- firstName: Required, max 50 chars, trimmed
+- lastName: Required, max 50 chars, trimmed
+- contactNumber: Optional, international format
+- role: Enum ['admin', 'employee', 'supervisor', 'master-admin']
+- company: Required, valid ObjectId
+
+Task Model:
+
+- title: Required, max 300 chars
+- description: Optional, max 2000 chars
+- assignees: Required, non-empty array
+- observers: Required, array
+- dueDateTime: Required, valid date
+- priority: Enum ['High', 'Medium', 'Low']
+- status: Enum ['Completed', 'In Progress', 'Pending', 'Overdue', 'For Approval']
+- taskType: Enum ['Single', 'Recurring']
+- company: Required, valid ObjectId
+
+Notification Model:
+
+- userId: Required, valid User ObjectId
+- message: Required, string
+- type: Enum ['taskApproval', 'taskRejected', 'system', 'reminder', 'Overdue']
+- expiresAt: Auto-set to 2 days from creation
+- company: Required, valid Company ObjectId
+
+===============================================
+
+1. SAAS IMPLEMENTATION GUIDE
+
+===============================================
+
+OVERVIEW:
+
+ForaTask implements a Software-as-a-Service (SaaS) business model with:
+
+- Subscription-based pricing
+- Multi-tenant architecture
+- Centralized platform management
+- Payment gateway integration (Razorpay)
+- Automatic access control
+
+SUBSCRIPTION PLANS:
+
+Free Trial:
+
+- Duration: 3 months (90 days)
+- Features: Full access to all ForaTask features
+- User Limit: No limit during trial
+- Automatic Transition: Requires paid plan after expiration
+
+Paid Plan - Usage-Based Pricing:
+
+- Base Plan: ₹249/month for up to 5 users
+- Additional Users: ₹50/month per user after first 5
+
+Examples:
+
+5 users or less:    ₹249/month
+
+6 users:           ₹299/month
+
+10 users:          ₹499/month
+
+20 users:          ₹999/month
+
+Billing Cycle:
+
+- Monthly recurring billing
+- Auto-renewal unless cancelled
+- Payment due date: Same day of month as subscription start
+
+USER ROLES:
+
+Role Hierarchy:
+
+Master Admin (Platform Owner)
+
+↓
+
+Company Admin (Organization Owner/Regular Admin)
+
+↓
+
+Supervisor
+
+↓
+
+Employee
+
+Master Admin:
+
+- Platform owner super-user
+- Manages entire SaaS platform
+- Views all companies and subscriptions
+- Access complete billing history
+- Can manually restrict/unrestrict companies
+- Separate login portal: /master-admin
+
+Company Admin:
+
+- Organization owner / Regular admin
+- Manages company subscription
+- Can add/remove users
+- Views company billing
+- Receives expiry notifications
+
+ACCESS CONTROL:
+
+When Subscription Expires:
+
+For Company Admins:
+
+- Show modal: "Your subscription has expired. Please renew."
+- CTA: "Renew Subscription" button
+- Access: Read-only (can view but not create/edit/delete)
+
+For Supervisors/Employees:
+
+- Show modal: "You are restricted. Contact your admin."
+- Access: Completely blocked
+- Display admin contact email
+
+Pre-Expiry Notifications (Admins Only):
+
+- 7 days before: Email + in-app notification
+- 3 days before: Email + prominent dashboard banner
+- 1 day before: Email + urgent alert modal
+- On expiry: Immediate restriction
+
+MASTER ADMIN PANEL:
+
+Centralized dashboard at /master-admin or [admin.foratask.com](http://admin.foratask.com)
+
+Features:
+
+1. Dashboard Overview
+- Total Companies count
+- Active Subscriptions count
+- Trial Accounts count
+- Expired Accounts count
+- Total Revenue (MRR)
+- Total Users across all companies
+- Recent Sign-ups list
+- Payment Analytics charts
+1. Companies Management
+- List view with filters and search
+- Columns: Name, Email, Status, User Count, Bill, Expiry
+- Company details page
+- Admin actions: Restrict/Unrestrict, Extend trial, Adjust billing
+1. Payments & Billing
+- Revenue overview
+- All payments list
+- Failed payments section
+- Revenue charts
+1. Analytics & Reports
+- Conversion rate (Trial → Paid)
+- Churn rate
+- Customer Lifetime Value
+- Average users per company
+- User growth rate
+- Exportable reports
+
+PAYMENT INTEGRATION (Razorpay):
+
+Payment Methods Supported:
+
+- Credit/Debit Cards (Visa, Mastercard, RuPay)
+- UPI (Google Pay, PhonePe, Paytm)
+- Net Banking
+- Wallets (Paytm, PhonePe, etc.)
+
+Backend Endpoints:
+
+POST /payment/create-order          // Create order for initial payment
+
+POST /payment/verify-payment        // Verify payment signature
+
+POST /payment/create-subscription   // Create recurring subscription
+
+POST /payment/update-subscription   // Update when users added/removed
+
+POST /payment/cancel-subscription   // Cancel subscription
+
+GET  /payment/invoice-history       // Get payment history
+
+POST /payment/webhook               // Razorpay webhook for status updates
+
+DATABASE SCHEMA ADDITIONS:
+
+Subscriptions Collection:
+
+{
+
+_id: ObjectId,
+
+company: ObjectId (ref: Company, required),
+
+status: String (enum: ['trial', 'active', 'expired', 'cancelled']),
+
+planType: String (enum: ['free_trial', 'paid']),
+
+currentUserCount: Number,
+
+basePrice: Number (default: 249),
+
+perUserPrice: Number (default: 50),
+
+totalAmount: Number,
+
+// Trial details
+
+trialStartDate: Date,
+
+trialEndDate: Date,
+
+// Paid subscription details
+
+subscriptionStartDate: Date,
+
+currentPeriodStart: Date,
+
+currentPeriodEnd: Date,
+
+nextBillingDate: Date,
+
+// Razorpay integration
+
+razorpaySubscriptionId: String,
+
+razorpayCustomerId: String,
+
+// Billing history
+
+lastPaymentDate: Date,
+
+lastPaymentAmount: Number,
+
+lastPaymentStatus: String,
+
+createdAt: Date,
+
+updatedAt: Date
+
+}
+
+Payments Collection:
+
+{
+
+_id: ObjectId,
+
+company: ObjectId (ref: Company),
+
+subscription: ObjectId (ref: Subscription),
+
+amount: Number,
+
+currency: String (default: 'INR'),
+
+status: String (enum: ['pending', 'success', 'failed', 'refunded']),
+
+paymentMethod: String,
+
+razorpayOrderId: String,
+
+razorpayPaymentId: String,
+
+razorpaySignature: String,
+
+invoiceNumber: String (unique),
+
+invoiceUrl: String,
+
+description: String,
+
+userCountAtPayment: Number,
+
+billingPeriodStart: Date,
+
+billingPeriodEnd: Date,
+
+paymentDate: Date,
+
+createdAt: Date
+
+}
+
+ENVIRONMENT VARIABLES:
+
+Backend:
+
+RAZORPAY_KEY_ID=rzp_test_xxxxxxxxxxxxx
+
+RAZORPAY_KEY_SECRET=xxxxxxxxxxxxxxxxxxxxxxxx
+
+RAZORPAY_WEBHOOK_SECRET=whsec_xxxxxxxxxxxxx
+
+BASE_PLAN_PRICE=249
+
+PER_USER_PRICE=50
+
+BASE_PLAN_USER_LIMIT=5
+
+FREE_TRIAL_DAYS=90
+
+MARKETING_WEBSITE_URL=https://foratask.com
+
+SMTP_HOST=[smtp.gmail.com](http://smtp.gmail.com)
+
+SMTP_PORT=587
+
+[SMTP_USER=noreply@foratask.com](mailto:SMTP_USER=noreply@foratask.com)
+
+SMTP_PASS=xxxxxxxxxxxxx
+
+Frontend:
+
+EXPO_PUBLIC_RAZORPAY_KEY_ID=rzp_test_xxxxxxxxxxxxx
+
+EXPO_PUBLIC_MARKETING_URL=https://foratask.com
+
+EXPO_PUBLIC_MASTER_ADMIN_URL=https://admin.foratask.com
+
+MARKETING WEBSITE:
+
+Tech Stack: Next.js 14+ with TailwindCSS
+
+Key Pages:
+
+1. Homepage - Product overview, features, testimonials, CTAs
+2. Features Page - Detailed feature descriptions with screenshots
+3. Pricing Page - Interactive calculator, plan comparison
+4. Sign Up Page - Two-step registration form
+5. Login Page - Redirect to application
+6. About/Contact - Company info, contact form
+7. Legal Pages - Privacy Policy, Terms of Service, Refund Policy
+
+Registration Flow:
+
+1. User visits marketing website
+2. Clicks "Start Free Trial" or "Get Started"
+3. Two-step registration form:
+    - Step 1: Company information
+    - Step 2: Admin account
+4. If Paid Plan → Redirect to Razorpay payment
+5. Account creation in backend
+6. Redirect to ForaTask app
+
+===============================================
+
+END OF DOCUMENTATION
+
+===============================================

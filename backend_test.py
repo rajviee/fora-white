@@ -22,13 +22,13 @@ class ForaTaskAPITester:
             "password": "TestPass123!",
             "firstName": "Test",
             "lastName": "User",
-            "contactNumber": "9876543210",
+            "contactNumber": "+919876543210",
             "dateOfBirth": "1990-01-01",
-            "gender": "Male",
+            "gender": "male",
             "designation": "CEO",
             "companyEmail": f"company_{int(time.time())}@example.com",
             "companyName": f"Test Company {int(time.time())}",
-            "companyContactNumber": "9876543210",
+            "companyContactNumber": "+919876543210",
             "companyAddress": "123 Test Street, Test City"
         }
         

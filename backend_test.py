@@ -522,6 +522,7 @@ class ForaTaskAPITester:
             self.test_restrict_company,
             self.test_unrestrict_company,
             self.test_subscription_status,
+            self.test_task_completion_history,
             self.test_payment_creation_503
         ]
         

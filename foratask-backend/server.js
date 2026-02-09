@@ -452,8 +452,12 @@ cron.schedule("0 * * * *", async () => {
 });
 
 
-mongoose.connect(MONGO_URI).then(() => {
+mongoose.connect(MONGO_URI).then(async () => {
   console.log("MongoDB Connected");
+  
+  // Seed master admin on startup
+  await seedMasterAdmin();
+  
   server.listen(PORT, () => {
     console.log('Server running on 3000');
   })

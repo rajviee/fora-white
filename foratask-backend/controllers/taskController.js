@@ -3,6 +3,7 @@ const User = require('../models/user');
 const path = require("path");
 const SubTask = require('../models/subtask');
 const Notification = require('../models/notification');
+const TaskCompletionHistory = require('../models/taskCompletionHistory');
 const mongoose = require('mongoose');
 const fs = require("fs");
 const { sendPushNotification, sendBulkPushNotifications } = require('./notificationController');

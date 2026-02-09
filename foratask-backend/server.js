@@ -274,13 +274,54 @@ cron.schedule("* * * * *", async () => {
 cron.schedule("0 0 * * *", async () => {
   try {
     await Notification.deleteMany({ expiresAt: { $lt: new Date() } });
+    
+    // Find recurring tasks that are completed or need reset
     const recurringTasks = await Task.find({
+      taskType: 'Recurring',
       recurringSchedule: { $ne: null },
-      status: { $in: ["Completed", "Overdue", "InProgress"] }
+      status: { $in: ["Completed", "Overdue", "In Progress"] }
     });
+    
     for (const task of recurringTasks) {
       const currentDue = new Date(task.dueDateTime);
       let nextDue = new Date(currentDue);
+      
+      // Calculate cycle number from existing history
+      const historyCount = await TaskCompletionHistory.countDocuments({ task: task._id });
+      const cycleNumber = historyCount + 1;
+
+      // Save completion history before resetting
+      if (task.status === "Completed" || task.status === "Overdue") {
+        try {
+          await TaskCompletionHistory.create({
+            task: task._id,
+            company: task.company,
+            taskSnapshot: {
+              title: task.title,
+              description: task.description,
+              priority: task.priority,
+              taskType: task.taskType,
+              recurringSchedule: task.recurringSchedule,
+              isSelfTask: task.isSelfTask
+            },
+            completedBy: task.assignees[0],
+            completedAt: new Date(),
+            statusAtCompletion: task.status,
+            originalDueDate: task.dueDateTime,
+            completedOnTime: task.status === "Completed",
+            daysOverdue: task.status === "Overdue" ? Math.ceil((new Date() - currentDue) / (1000 * 60 * 60 * 24)) : 0,
+            assigneesSnapshot: task.assignees,
+            observersSnapshot: task.observers,
+            cycleNumber,
+            cycleStartDate: currentDue,
+            cycleEndDate: new Date(),
+            wasAutoApproved: task.isSelfTask
+          });
+          console.log(`📝 Saved completion history for recurring task "${task.title}" - Cycle ${cycleNumber}`);
+        } catch (historyError) {
+          console.error(`Failed to save history for task ${task._id}:`, historyError.message);
+        }
+      }
 
       // Calculate next due date based on recurring schedule
       switch (task.recurringSchedule) {
@@ -302,25 +343,111 @@ cron.schedule("0 0 * * *", async () => {
       task.dueDateTime = nextDue;
       task.status = "Pending";
 
-      // Reset notifications for next cycle (if they exist)
-      if (task.notifications && task.notifications.length > 0) {
-        // Calculate time difference between old and new due date
+      // Reset notifications for next cycle
+      if (task.notification && task.notification.length > 0) {
         const timeDiff = nextDue.getTime() - currentDue.getTime();
-
-        // Adjust all notification times by the same difference
-        task.notifications = task.notifications.map(notifTime => {
-          const originalNotifTime = new Date(notifTime);
-          return new Date(originalNotifTime.getTime() + timeDiff);
-        });
+        task.notification = task.notification.map(notif => ({
+          ...notif,
+          date: new Date(new Date(notif.date).getTime() + timeDiff),
+          notifId: null
+        }));
       }
 
       await task.save();
-
       console.log(`✅ Recurring task "${task.title}" reset for ${nextDue.toISOString()}`);
     }
   }
   catch (err) {
-    res.status(500).json({ message: err.message });
+    console.error("Recurring task cron error:", err.message);
+  }
+});
+
+// Subscription expiry notification cron - runs every hour
+cron.schedule("0 * * * *", async () => {
+  try {
+    console.log("📅 Checking subscription expiry notifications...");
+    const now = new Date();
+
+    // Find all active/trial subscriptions
+    const subscriptions = await Subscription.find({
+      status: { $in: ['trial', 'active'] }
+    }).populate('company');
+
+    for (const subscription of subscriptions) {
+      const daysLeft = subscription.getDaysUntilExpiry();
+      const company = subscription.company;
+      
+      if (!company) continue;
+
+      // Get company admin(s)
+      const admins = await User.find({
+        company: company._id,
+        role: 'admin'
+      });
+
+      if (admins.length === 0) continue;
+
+      let notificationType = null;
+      let message = null;
+
+      // 7 days notification
+      if (daysLeft <= 7 && daysLeft > 3 && !subscription.expiryNotificationsSent.sevenDay) {
+        notificationType = 'sevenDay';
+        message = `Your ${subscription.status === 'trial' ? 'free trial' : 'subscription'} expires in ${daysLeft} days. Renew now to continue using ForaTask.`;
+      }
+      // 3 days notification
+      else if (daysLeft <= 3 && daysLeft > 1 && !subscription.expiryNotificationsSent.threeDay) {
+        notificationType = 'threeDay';
+        message = `Urgent: Your ${subscription.status === 'trial' ? 'free trial' : 'subscription'} expires in ${daysLeft} days. Renew to avoid service interruption.`;
+      }
+      // 1 day notification
+      else if (daysLeft <= 1 && daysLeft > 0 && !subscription.expiryNotificationsSent.oneDay) {
+        notificationType = 'oneDay';
+        message = `Final Notice: Your ${subscription.status === 'trial' ? 'free trial' : 'subscription'} expires tomorrow! Renew immediately to prevent access loss.`;
+      }
+      // Expired notification
+      else if (daysLeft <= 0 && !subscription.expiryNotificationsSent.expired) {
+        notificationType = 'expired';
+        message = `Your ${subscription.status === 'trial' ? 'free trial' : 'subscription'} has expired. Renew now to restore full access.`;
+        subscription.status = 'expired';
+      }
+
+      if (notificationType && message) {
+        // Create notifications for admins
+        const notifications = admins.map(admin => ({
+          userId: admin._id,
+          message,
+          type: 'system',
+          company: company._id
+        }));
+
+        await Notification.insertMany(notifications);
+
+        // Send push notifications
+        const pushMessages = admins
+          .filter(admin => admin.expoPushToken)
+          .map(admin => ({
+            to: admin.expoPushToken,
+            sound: 'foranotif.wav',
+            title: 'Subscription Alert',
+            body: message,
+            channelId: 'default',
+            data: { type: 'subscription_expiry' }
+          }));
+
+        if (pushMessages.length > 0) {
+          await sendBulkPushNotifications(pushMessages);
+        }
+
+        // Mark notification as sent
+        subscription.expiryNotificationsSent[notificationType] = true;
+        await subscription.save();
+
+        console.log(`📧 Sent ${notificationType} expiry notification for company: ${company.companyName}`);
+      }
+    }
+  } catch (err) {
+    console.error("Subscription expiry cron error:", err.message);
   }
 });
 

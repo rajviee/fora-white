@@ -125,6 +125,7 @@ export default function SignUp() {
                       value={companyData.companyEmail}
                       onChange={handleCompanyChange}
                       required
+                      autoComplete="email"
                       className="w-full pl-12 pr-4 py-3 bg-dark-900 border border-dark-700 rounded-xl focus:outline-none focus:border-primary-500"
                       placeholder="contact@company.com"
                     />

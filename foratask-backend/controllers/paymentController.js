@@ -34,6 +34,10 @@ const calculateSubscriptionAmount = (userCount) => {
 // Create Razorpay Order
 const createOrder = async (req, res) => {
     try {
+        if (!razorpay) {
+            return res.status(503).json({ message: 'Payment service not configured. Please contact support.' });
+        }
+        
         const { userCount } = req.body;
         const companyId = req.user.company;
 

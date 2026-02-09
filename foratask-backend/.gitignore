@@ -1,0 +1,7 @@
+.env
+/node_modules
+sample.js
+sample1.js
+/uploads
+info.txt
+forasocketmessage.txt

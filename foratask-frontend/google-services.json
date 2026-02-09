@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "458733263262",
+    "project_id": "foratask-vw",
+    "storage_bucket": "foratask-vw.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:458733263262:android:55ada4856e59ab0cba1e8f",
+        "android_client_info": {
+          "package_name": "com.devtushar.foratask"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBX8yWINF6noxi4yys0lSzCHQres-TzKB0"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

@@ -1,0 +1,873 @@
+<html><head><meta http-equiv="Content-Type" content="text/html; charset=utf-8"/><title>5. Database &amp; Schema</title><style>
+/* cspell:disable-file */
+/* webkit printing magic: print all background colors */
+html {
+	-webkit-print-color-adjust: exact;
+}
+* {
+	box-sizing: border-box;
+	-webkit-print-color-adjust: exact;
+}
+
+html,
+body {
+	margin: 0;
+	padding: 0;
+}
+@media only screen {
+	body {
+		margin: 2em auto;
+		max-width: 900px;
+		color: rgb(55, 53, 47);
+	}
+}
+
+body {
+	line-height: 1.5;
+	white-space: pre-wrap;
+}
+
+a,
+a.visited {
+	color: inherit;
+	text-decoration: underline;
+}
+
+.pdf-relative-link-path {
+	font-size: 80%;
+	color: #444;
+}
+
+h1,
+h2,
+h3 {
+	letter-spacing: -0.01em;
+	line-height: 1.2;
+	font-weight: 600;
+	margin-bottom: 0;
+}
+
+/* Override strong tags inside headings to maintain consistent weight */
+h1 strong,
+h2 strong,
+h3 strong {
+	font-weight: 600;
+}
+
+.page-title {
+	font-size: 2.5rem;
+	font-weight: 700;
+	margin-top: 0;
+	margin-bottom: 0.75em;
+}
+
+h1 {
+	font-size: 1.875rem;
+	margin-top: 1.875rem;
+}
+
+h2 {
+	font-size: 1.5rem;
+	margin-top: 1.5rem;
+}
+
+h3 {
+	font-size: 1.25rem;
+	margin-top: 1.25rem;
+}
+
+.source {
+	border: 1px solid #ddd;
+	border-radius: 3px;
+	padding: 1.5em;
+	word-break: break-all;
+}
+
+.callout {
+	border-radius: 10px;
+	padding: 1rem;
+}
+
+figure {
+	margin: 1.25em 0;
+	page-break-inside: avoid;
+}
+
+figcaption {
+	opacity: 0.5;
+	font-size: 85%;
+	margin-top: 0.5em;
+}
+
+mark {
+	background-color: transparent;
+}
+
+.indented {
+	padding-left: 1.5em;
+}
+
+hr {
+	background: transparent;
+	display: block;
+	width: 100%;
+	height: 1px;
+	visibility: visible;
+	border: none;
+	border-bottom: 1px solid rgba(55, 53, 47, 0.09);
+}
+
+img {
+	max-width: 100%;
+}
+
+@media only print {
+	img {
+		max-height: 100vh;
+		object-fit: contain;
+	}
+}
+
+@page {
+	margin: 1in;
+}
+
+.collection-content {
+	font-size: 0.875rem;
+}
+
+.collection-content td {
+	white-space: pre-wrap;
+	word-break: break-word;
+}
+
+.column-list {
+	display: flex;
+	justify-content: space-between;
+}
+
+.column {
+	padding: 0 1em;
+}
+
+.column:first-child {
+	padding-left: 0;
+}
+
+.column:last-child {
+	padding-right: 0;
+}
+
+.table_of_contents-item {
+	display: block;
+	font-size: 0.875rem;
+	line-height: 1.3;
+	padding: 0.125rem;
+}
+
+.table_of_contents-indent-1 {
+	margin-left: 1.5rem;
+}
+
+.table_of_contents-indent-2 {
+	margin-left: 3rem;
+}
+
+.table_of_contents-indent-3 {
+	margin-left: 4.5rem;
+}
+
+.table_of_contents-link {
+	text-decoration: none;
+	opacity: 0.7;
+	border-bottom: 1px solid rgba(55, 53, 47, 0.18);
+}
+
+table,
+th,
+td {
+	border: 1px solid rgba(55, 53, 47, 0.09);
+	border-collapse: collapse;
+}
+
+table {
+	border-left: none;
+	border-right: none;
+}
+
+th,
+td {
+	font-weight: normal;
+	padding: 0.25em 0.5em;
+	line-height: 1.5;
+	min-height: 1.5em;
+	text-align: left;
+}
+
+th {
+	color: rgba(55, 53, 47, 0.6);
+}
+
+ol,
+ul {
+	margin: 0;
+	margin-block-start: 0.6em;
+	margin-block-end: 0.6em;
+}
+
+li > ol:first-child,
+li > ul:first-child {
+	margin-block-start: 0.6em;
+}
+
+ul > li {
+	list-style: disc;
+}
+
+ul.to-do-list {
+	padding-inline-start: 0;
+}
+
+ul.to-do-list > li {
+	list-style: none;
+}
+
+.to-do-children-checked {
+	text-decoration: line-through;
+	opacity: 0.375;
+}
+
+ul.toggle > li {
+	list-style: none;
+}
+
+ul {
+	padding-inline-start: 1.7em;
+}
+
+ul > li {
+	padding-left: 0.1em;
+}
+
+ol {
+	padding-inline-start: 1.6em;
+}
+
+ol > li {
+	padding-left: 0.2em;
+}
+
+.mono ol {
+	padding-inline-start: 2em;
+}
+
+.mono ol > li {
+	text-indent: -0.4em;
+}
+
+.toggle {
+	padding-inline-start: 0em;
+	list-style-type: none;
+}
+
+/* Indent toggle children */
+.toggle > li > details {
+	padding-left: 1.7em;
+}
+
+.toggle > li > details > summary {
+	margin-left: -1.1em;
+}
+
+.selected-value {
+	display: inline-block;
+	padding: 0 0.5em;
+	background: rgba(206, 205, 202, 0.5);
+	border-radius: 3px;
+	margin-right: 0.5em;
+	margin-top: 0.3em;
+	margin-bottom: 0.3em;
+	white-space: nowrap;
+}
+
+.collection-title {
+	display: inline-block;
+	margin-right: 1em;
+}
+
+.page-description {
+	margin-bottom: 2em;
+}
+
+.simple-table {
+	margin-top: 1em;
+	font-size: 0.875rem;
+	empty-cells: show;
+}
+.simple-table td {
+	height: 29px;
+	min-width: 120px;
+}
+
+.simple-table th {
+	height: 29px;
+	min-width: 120px;
+}
+
+.simple-table-header-color {
+	background: rgb(247, 246, 243);
+	color: black;
+}
+.simple-table-header {
+	font-weight: 500;
+}
+
+time {
+	opacity: 0.5;
+}
+
+.icon {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	max-width: 1.2em;
+	max-height: 1.2em;
+	text-decoration: none;
+	vertical-align: text-bottom;
+	margin-right: 0.5em;
+}
+
+img.icon {
+	border-radius: 3px;
+}
+
+.callout img.notion-static-icon {
+	width: 1em;
+	height: 1em;
+}
+
+.callout p {
+	margin: 0;
+}
+
+.callout h1,
+.callout h2,
+.callout h3 {
+	margin: 0 0 0.6rem;
+}
+
+.user-icon {
+	width: 1.5em;
+	height: 1.5em;
+	border-radius: 100%;
+	margin-right: 0.5rem;
+}
+
+.user-icon-inner {
+	font-size: 0.8em;
+}
+
+.text-icon {
+	border: 1px solid #000;
+	text-align: center;
+}
+
+.page-cover-image {
+	display: block;
+	object-fit: cover;
+	width: 100%;
+	max-height: 30vh;
+}
+
+.page-header-icon {
+	font-size: 3rem;
+	margin-bottom: 1rem;
+}
+
+.page-header-icon-with-cover {
+	margin-top: -0.72em;
+	margin-left: 0.07em;
+}
+
+.page-header-icon img {
+	border-radius: 3px;
+}
+
+.link-to-page {
+	margin: 1em 0;
+	padding: 0;
+	border: none;
+	font-weight: 500;
+}
+
+p > .user {
+	opacity: 0.5;
+}
+
+td > .user,
+td > time {
+	white-space: nowrap;
+}
+
+input[type="checkbox"] {
+	transform: scale(1.5);
+	margin-right: 0.6em;
+	vertical-align: middle;
+}
+
+p {
+	margin-top: 0.5em;
+	margin-bottom: 0.5em;
+}
+
+.image {
+	border: none;
+	margin: 1.5em 0;
+	padding: 0;
+	border-radius: 0;
+	text-align: center;
+}
+
+.code,
+code {
+	background: rgba(135, 131, 120, 0.15);
+	border-radius: 3px;
+	padding: 0.2em 0.4em;
+	border-radius: 3px;
+	font-size: 85%;
+	tab-size: 2;
+}
+
+code {
+	color: #eb5757;
+}
+
+.code {
+	padding: 1.5em 1em;
+}
+
+.code-wrap {
+	white-space: pre-wrap;
+	word-break: break-all;
+}
+
+.code > code {
+	background: none;
+	padding: 0;
+	font-size: 100%;
+	color: inherit;
+}
+
+blockquote {
+	font-size: 1em;
+	margin: 1em 0;
+	padding-left: 1em;
+	border-left: 3px solid rgb(55, 53, 47);
+}
+
+blockquote.quote-large {
+	font-size: 1.25em;
+}
+
+.bookmark {
+	text-decoration: none;
+	max-height: 8em;
+	padding: 0;
+	display: flex;
+	width: 100%;
+	align-items: stretch;
+}
+
+.bookmark-title {
+	font-size: 0.85em;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	height: 1.75em;
+	white-space: nowrap;
+}
+
+.bookmark-text {
+	display: flex;
+	flex-direction: column;
+}
+
+.bookmark-info {
+	flex: 4 1 180px;
+	padding: 12px 14px 14px;
+	display: flex;
+	flex-direction: column;
+	justify-content: space-between;
+}
+
+.bookmark-image {
+	width: 33%;
+	flex: 1 1 180px;
+	display: block;
+	position: relative;
+	object-fit: cover;
+	border-radius: 1px;
+}
+
+.bookmark-description {
+	color: rgba(55, 53, 47, 0.6);
+	font-size: 0.75em;
+	overflow: hidden;
+	max-height: 4.5em;
+	word-break: break-word;
+}
+
+.bookmark-href {
+	font-size: 0.75em;
+	margin-top: 0.25em;
+}
+
+.sans { font-family: ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI Variable Display", "Segoe UI", Helvetica, "Apple Color Emoji", "Noto Sans Arabic", "Noto Sans Hebrew", Arial, sans-serif, "Segoe UI Emoji", "Segoe UI Symbol"; }
+.code { font-family: "SFMono-Regular", Menlo, Consolas, "PT Mono", "Liberation Mono", Courier, monospace; }
+.serif { font-family: Lyon-Text, Georgia, ui-serif, serif; }
+.mono { font-family: iawriter-mono, Nitti, Menlo, Courier, monospace; }
+.pdf .sans { font-family: Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI Variable Display", "Segoe UI", Helvetica, "Apple Color Emoji", "Noto Sans Arabic", "Noto Sans Hebrew", Arial, sans-serif, "Segoe UI Emoji", "Segoe UI Symbol", 'Twemoji', 'Noto Color Emoji', 'Noto Sans CJK JP'; }
+.pdf:lang(zh-CN) .sans { font-family: Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI Variable Display", "Segoe UI", Helvetica, "Apple Color Emoji", "Noto Sans Arabic", "Noto Sans Hebrew", Arial, sans-serif, "Segoe UI Emoji", "Segoe UI Symbol", 'Twemoji', 'Noto Color Emoji', 'Noto Sans CJK SC'; }
+.pdf:lang(zh-TW) .sans { font-family: Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI Variable Display", "Segoe UI", Helvetica, "Apple Color Emoji", "Noto Sans Arabic", "Noto Sans Hebrew", Arial, sans-serif, "Segoe UI Emoji", "Segoe UI Symbol", 'Twemoji', 'Noto Color Emoji', 'Noto Sans CJK TC'; }
+.pdf:lang(ko-KR) .sans { font-family: Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI Variable Display", "Segoe UI", Helvetica, "Apple Color Emoji", "Noto Sans Arabic", "Noto Sans Hebrew", Arial, sans-serif, "Segoe UI Emoji", "Segoe UI Symbol", 'Twemoji', 'Noto Color Emoji', 'Noto Sans CJK KR'; }
+.pdf .code { font-family: Source Code Pro, "SFMono-Regular", Menlo, Consolas, "PT Mono", "Liberation Mono", Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK JP'; }
+.pdf:lang(zh-CN) .code { font-family: Source Code Pro, "SFMono-Regular", Menlo, Consolas, "PT Mono", "Liberation Mono", Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK SC'; }
+.pdf:lang(zh-TW) .code { font-family: Source Code Pro, "SFMono-Regular", Menlo, Consolas, "PT Mono", "Liberation Mono", Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK TC'; }
+.pdf:lang(ko-KR) .code { font-family: Source Code Pro, "SFMono-Regular", Menlo, Consolas, "PT Mono", "Liberation Mono", Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK KR'; }
+.pdf .serif { font-family: PT Serif, Lyon-Text, Georgia, ui-serif, serif, 'Twemoji', 'Noto Color Emoji', 'Noto Serif CJK JP'; }
+.pdf:lang(zh-CN) .serif { font-family: PT Serif, Lyon-Text, Georgia, ui-serif, serif, 'Twemoji', 'Noto Color Emoji', 'Noto Serif CJK SC'; }
+.pdf:lang(zh-TW) .serif { font-family: PT Serif, Lyon-Text, Georgia, ui-serif, serif, 'Twemoji', 'Noto Color Emoji', 'Noto Serif CJK TC'; }
+.pdf:lang(ko-KR) .serif { font-family: PT Serif, Lyon-Text, Georgia, ui-serif, serif, 'Twemoji', 'Noto Color Emoji', 'Noto Serif CJK KR'; }
+.pdf .mono { font-family: PT Mono, iawriter-mono, Nitti, Menlo, Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK JP'; }
+.pdf:lang(zh-CN) .mono { font-family: PT Mono, iawriter-mono, Nitti, Menlo, Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK SC'; }
+.pdf:lang(zh-TW) .mono { font-family: PT Mono, iawriter-mono, Nitti, Menlo, Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK TC'; }
+.pdf:lang(ko-KR) .mono { font-family: PT Mono, iawriter-mono, Nitti, Menlo, Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK KR'; }
+.highlight-default {
+	color: rgba(44, 44, 43, 1);
+}
+.highlight-gray {
+	color: rgba(125, 122, 117, 1);
+	fill: rgba(125, 122, 117, 1);
+}
+.highlight-brown {
+	color: rgba(159, 118, 90, 1);
+	fill: rgba(159, 118, 90, 1);
+}
+.highlight-orange {
+	color: rgba(210, 123, 45, 1);
+	fill: rgba(210, 123, 45, 1);
+}
+.highlight-yellow {
+	color: rgba(203, 148, 52, 1);
+	fill: rgba(203, 148, 52, 1);
+}
+.highlight-teal {
+	color: rgba(80, 148, 110, 1);
+	fill: rgba(80, 148, 110, 1);
+}
+.highlight-blue {
+	color: rgba(56, 125, 201, 1);
+	fill: rgba(56, 125, 201, 1);
+}
+.highlight-purple {
+	color: rgba(154, 107, 180, 1);
+	fill: rgba(154, 107, 180, 1);
+}
+.highlight-pink {
+	color: rgba(193, 76, 138, 1);
+	fill: rgba(193, 76, 138, 1);
+}
+.highlight-red {
+	color: rgba(207, 81, 72, 1);
+	fill: rgba(207, 81, 72, 1);
+}
+.highlight-default_background {
+	color: rgba(44, 44, 43, 1);
+}
+.highlight-gray_background {
+	background: rgba(42, 28, 0, 0.07);
+}
+.highlight-brown_background {
+	background: rgba(139, 46, 0, 0.086);
+}
+.highlight-orange_background {
+	background: rgba(224, 101, 1, 0.129);
+}
+.highlight-yellow_background {
+	background: rgba(211, 168, 0, 0.137);
+}
+.highlight-teal_background {
+	background: rgba(0, 100, 45, 0.09);
+}
+.highlight-blue_background {
+	background: rgba(0, 124, 215, 0.094);
+}
+.highlight-purple_background {
+	background: rgba(102, 0, 178, 0.078);
+}
+.highlight-pink_background {
+	background: rgba(197, 0, 93, 0.086);
+}
+.highlight-red_background {
+	background: rgba(223, 22, 0, 0.094);
+}
+.block-color-default {
+	color: inherit;
+	fill: inherit;
+}
+.block-color-gray {
+	color: rgba(125, 122, 117, 1);
+	fill: rgba(125, 122, 117, 1);
+}
+.block-color-brown {
+	color: rgba(159, 118, 90, 1);
+	fill: rgba(159, 118, 90, 1);
+}
+.block-color-orange {
+	color: rgba(210, 123, 45, 1);
+	fill: rgba(210, 123, 45, 1);
+}
+.block-color-yellow {
+	color: rgba(203, 148, 52, 1);
+	fill: rgba(203, 148, 52, 1);
+}
+.block-color-teal {
+	color: rgba(80, 148, 110, 1);
+	fill: rgba(80, 148, 110, 1);
+}
+.block-color-blue {
+	color: rgba(56, 125, 201, 1);
+	fill: rgba(56, 125, 201, 1);
+}
+.block-color-purple {
+	color: rgba(154, 107, 180, 1);
+	fill: rgba(154, 107, 180, 1);
+}
+.block-color-pink {
+	color: rgba(193, 76, 138, 1);
+	fill: rgba(193, 76, 138, 1);
+}
+.block-color-red {
+	color: rgba(207, 81, 72, 1);
+	fill: rgba(207, 81, 72, 1);
+}
+.block-color-default_background {
+	color: inherit;
+	fill: inherit;
+}
+.block-color-gray_background {
+	background: rgba(240, 239, 237, 1);
+}
+.block-color-brown_background {
+	background: rgba(245, 237, 233, 1);
+}
+.block-color-orange_background {
+	background: rgba(251, 235, 222, 1);
+}
+.block-color-yellow_background {
+	background: rgba(249, 243, 220, 1);
+}
+.block-color-teal_background {
+	background: rgba(232, 241, 236, 1);
+}
+.block-color-blue_background {
+	background: rgba(229, 242, 252, 1);
+}
+.block-color-purple_background {
+	background: rgba(243, 235, 249, 1);
+}
+.block-color-pink_background {
+	background: rgba(250, 233, 241, 1);
+}
+.block-color-red_background {
+	background: rgba(252, 233, 231, 1);
+}
+.select-value-color-default { background-color: rgba(42, 28, 0, 0.07); }
+.select-value-color-gray { background-color: rgba(28, 19, 1, 0.11); }
+.select-value-color-brown { background-color: rgba(127, 51, 0, 0.156); }
+.select-value-color-orange { background-color: rgba(196, 88, 0, 0.203); }
+.select-value-color-yellow { background-color: rgba(209, 156, 0, 0.282); }
+.select-value-color-green { background-color: rgba(0, 96, 38, 0.156); }
+.select-value-color-blue { background-color: rgba(0, 118, 217, 0.203); }
+.select-value-color-purple { background-color: rgba(92, 0, 163, 0.141); }
+.select-value-color-pink { background-color: rgba(183, 0, 78, 0.152); }
+.select-value-color-red { background-color: rgba(206, 24, 0, 0.164); }
+
+.checkbox {
+	display: inline-flex;
+	vertical-align: text-bottom;
+	width: 16;
+	height: 16;
+	background-size: 16px;
+	margin-left: 2px;
+	margin-right: 5px;
+}
+
+.checkbox-on {
+	background-image: url("data:image/svg+xml;charset=UTF-8,%3Csvg%20width%3D%2216%22%20height%3D%2216%22%20viewBox%3D%220%200%2016%2016%22%20fill%3D%22none%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%3E%0A%3Crect%20width%3D%2216%22%20height%3D%2216%22%20fill%3D%22%2358A9D7%22%2F%3E%0A%3Cpath%20d%3D%22M6.71429%2012.2852L14%204.9995L12.7143%203.71436L6.71429%209.71378L3.28571%206.2831L2%207.57092L6.71429%2012.2852Z%22%20fill%3D%22white%22%2F%3E%0A%3C%2Fsvg%3E");
+}
+
+.checkbox-off {
+	background-image: url("data:image/svg+xml;charset=UTF-8,%3Csvg%20width%3D%2216%22%20height%3D%2216%22%20viewBox%3D%220%200%2016%2016%22%20fill%3D%22none%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%3E%0A%3Crect%20x%3D%220.75%22%20y%3D%220.75%22%20width%3D%2214.5%22%20height%3D%2214.5%22%20fill%3D%22white%22%20stroke%3D%22%2336352F%22%20stroke-width%3D%221.5%22%2F%3E%0A%3C%2Fsvg%3E");
+}
+	
+</style></head><body><article id="69207983-c849-4546-8a13-f02bfae0de54" class="page sans"><header><div class="page-header-icon undefined"><span class="icon">🗄️</span></div><h1 class="page-title" dir="auto">5. Database &amp; Schema</h1><p class="page-description" dir="auto"></p></header><div class="page-body"><div style="display:contents" dir="auto"><h1 id="904e413b-64d6-4e53-8c71-e8296165a23a" class="">Database &amp; Schema Documentation</h1></div><div style="display:contents" dir="auto"><h2 id="3949f09e-99f7-44fd-a35f-13859fee0380" class="">Database Info</h2></div><div style="display:contents" dir="auto"><ul id="0f339cd2-e0e7-46d5-b7d1-204644eeaf1d" class="bulleted-list"><li style="list-style-type:disc"><strong>Database</strong>: MongoDB</li></ul></div><div style="display:contents" dir="auto"><ul id="4271eb5f-f108-4521-82d9-e20e87648ed8" class="bulleted-list"><li style="list-style-type:disc"><strong>Version</strong>: 5.0+ recommended</li></ul></div><div style="display:contents" dir="auto"><ul id="a35b7df4-39c6-4d47-be4f-c5488ab0f685" class="bulleted-list"><li style="list-style-type:disc"><strong>ORM</strong>: Mongoose v8.18.0</li></ul></div><div style="display:contents" dir="auto"><ul id="113f9182-7dfb-4512-ba7e-a08f22f23db4" class="bulleted-list"><li style="list-style-type:disc"><strong>Connection</strong>: <code>mongodb://127.0.0.1:27017/foratask</code></li></ul></div><div style="display:contents" dir="auto"><h2 id="3fc8879f-70fd-47e3-9d62-41259194c2bd" class="">Complete Schema</h2></div><div style="display:contents" dir="auto"><h3 id="52c5aaff-14c9-4226-be9f-afafd197cf61" class="">Users Collection</h3></div><div style="display:contents" dir="auto"><script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js" integrity="sha512-7Z9J3l1+EYfeaPKcGXu3MS/7T+w19WtKQY/n+xzmw4hZhJ9tyYmcUS+4QqAlzhicE5LAfMQSF3iFTK9bQdTxXg==" crossorigin="anonymous" referrerPolicy="no-referrer"></script><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism.min.css" integrity="sha512-tN7Ec6zAFaVSG3TpNAKtk4DOHNpSwKHxxrsiw4GHKESGPs5njn/0sMCUMl2svV4wo4BK/rCP7juYz+zx+l6oeQ==" crossorigin="anonymous" referrerPolicy="no-referrer"/><pre id="54763442-3ce5-4804-a7ef-c489375562a6" class="code code-wrap"><code class="language-JavaScript" style="white-space:pre-wrap;word-break:break-all">{
+  _id: ObjectId,
+  email: String (unique, required, validated),
+  password: String (hashed, required, min 8 chars),
+  firstName: String (required, max 50 chars),
+  lastName: String (required, max 50 chars),
+  subordinates: [ObjectId] (ref: User),
+  supervisor: ObjectId (ref: User),
+  avatar: {
+    filename: String,
+    originalName: String,
+    path: String,
+    size: Number,
+    mimeType: String,
+    fileExtension: String (enum: [&#x27;.png&#x27;, &#x27;.jpg&#x27;, &#x27;.jpeg&#x27;, null]),
+    uploadedAt: Date
+  },
+  contactNumber: String (validated international format),
+  dateOfBirth: Date,
+  gender: String (enum: [&#x27;male&#x27;, &#x27;female&#x27;, &#x27;other&#x27;, &#x27;prefer-not-to-say&#x27;]),
+  role: String (enum: [&#x27;master-admin&#x27;, &#x27;admin&#x27;, &#x27;employee&#x27;, &#x27;supervisor&#x27;], default: &#x27;employee&#x27;),
+  designation: String,
+  expoPushToken: String,
+  company: ObjectId (ref: Company, required),
+  createdAt: Date (auto),
+  updatedAt: Date (auto)
+}</code></pre></div><div style="display:contents" dir="auto"><h3 id="3a488a62-0704-4e73-a3ff-23d852988513" class="">Companies Collection</h3></div><div style="display:contents" dir="auto"><script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js" integrity="sha512-7Z9J3l1+EYfeaPKcGXu3MS/7T+w19WtKQY/n+xzmw4hZhJ9tyYmcUS+4QqAlzhicE5LAfMQSF3iFTK9bQdTxXg==" crossorigin="anonymous" referrerPolicy="no-referrer"></script><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism.min.css" integrity="sha512-tN7Ec6zAFaVSG3TpNAKtk4DOHNpSwKHxxrsiw4GHKESGPs5njn/0sMCUMl2svV4wo4BK/rCP7juYz+zx+l6oeQ==" crossorigin="anonymous" referrerPolicy="no-referrer"/><pre id="081d0e8c-c2db-4f47-933a-c31dc3dec387" class="code code-wrap"><code class="language-JavaScript" style="white-space:pre-wrap;word-break:break-all">{
+  _id: ObjectId,
+  companyEmail: String (unique, required, validated),
+  companyName: String (required),
+  companyAddress: String (required),
+  companyGSTNumber: String (optional, validated format),
+  companyPANNumber: String (optional, validated format),
+  owners: [ObjectId] (ref: User),
+  employees: [ObjectId] (ref: User),
+  companyContactNumber: String (required, validated),
+  subscription: ObjectId (ref: Subscription),
+  maxUsers: Number (default: null),
+  currentPlanUserCount: Number (default: 1),
+  isActive: Boolean (default: true),
+  createdAt: Date (auto),
+  updatedAt: Date (auto)
+}</code></pre></div><div style="display:contents" dir="auto"><h3 id="1c665c40-eaf3-4cb7-9a80-06e61afc1a3c" class="">Tasks Collection</h3></div><div style="display:contents" dir="auto"><script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js" integrity="sha512-7Z9J3l1+EYfeaPKcGXu3MS/7T+w19WtKQY/n+xzmw4hZhJ9tyYmcUS+4QqAlzhicE5LAfMQSF3iFTK9bQdTxXg==" crossorigin="anonymous" referrerPolicy="no-referrer"></script><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism.min.css" integrity="sha512-tN7Ec6zAFaVSG3TpNAKtk4DOHNpSwKHxxrsiw4GHKESGPs5njn/0sMCUMl2svV4wo4BK/rCP7juYz+zx+l6oeQ==" crossorigin="anonymous" referrerPolicy="no-referrer"/><pre id="545c59f1-1513-40e9-9def-3019753d89b3" class="code code-wrap"><code class="language-JavaScript" style="white-space:pre-wrap;word-break:break-all">{
+  _id: ObjectId,
+  title: String (required, max 300 chars),
+  description: String (max 2000 chars),
+  assignees: [ObjectId] (ref: User, required),
+  createdBy: ObjectId (ref: User),
+  observers: [ObjectId] (ref: User, required),
+  dueDateTime: Date (required),
+  priority: String (enum: [&#x27;High&#x27;, &#x27;Medium&#x27;, &#x27;Low&#x27;], default: &#x27;Medium&#x27;),
+  status: String (enum: [&#x27;Completed&#x27;, &#x27;In Progress&#x27;, &#x27;Pending&#x27;, &#x27;Overdue&#x27;, &#x27;For Approval&#x27;], default: &#x27;Pending&#x27;),
+  taskType: String (enum: [&#x27;Single&#x27;, &#x27;Recurring&#x27;], default: &#x27;Single&#x27;),
+  isSelfTask: Boolean (default: false),
+  recurringSchedule: String (enum: [&#x27;Daily&#x27;, &#x27;Weekly&#x27;, &#x27;Monthly&#x27;, &#x27;3-Months&#x27;]),
+  reminder: Date,
+  subTask: ObjectId (ref: Subtask),
+  repeatReminder: [String] (enum: [&#x27;10m&#x27;, &#x27;30m&#x27;, &#x27;1h&#x27;, &#x27;1d&#x27;, &#x27;1w&#x27;]),
+  notification: [{
+    date: Date,
+    notifId: ObjectId (ref: Notification),
+    type: String
+  }],
+  company: ObjectId (ref: Company, required),
+  documents: [{
+    filename: String,
+    originalName: String,
+    path: String,
+    size: Number,
+    mimeType: String,
+    fileExtension: String (enum: [&#x27;.png&#x27;, &#x27;.jpg&#x27;, &#x27;.jpeg&#x27;, &#x27;.pdf&#x27;, &#x27;.doc&#x27;, &#x27;.docx&#x27;, &#x27;.txt&#x27;]),
+    uploadedAt: Date (default: now),
+    uploadedBy: ObjectId (ref: User)
+  }],
+  createdAt: Date (auto),
+  updatedAt: Date (auto)
+}</code></pre></div><div style="display:contents" dir="auto"><h3 id="1918ff05-6a4e-4e22-943e-7826c9eb4522" class="">Subtasks Collection</h3></div><div style="display:contents" dir="auto"><script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js" integrity="sha512-7Z9J3l1+EYfeaPKcGXu3MS/7T+w19WtKQY/n+xzmw4hZhJ9tyYmcUS+4QqAlzhicE5LAfMQSF3iFTK9bQdTxXg==" crossorigin="anonymous" referrerPolicy="no-referrer"></script><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism.min.css" integrity="sha512-tN7Ec6zAFaVSG3TpNAKtk4DOHNpSwKHxxrsiw4GHKESGPs5njn/0sMCUMl2svV4wo4BK/rCP7juYz+zx+l6oeQ==" crossorigin="anonymous" referrerPolicy="no-referrer"/><pre id="56e651ea-79a4-41a0-9b61-84ea66cc4442" class="code code-wrap"><code class="language-JavaScript" style="white-space:pre-wrap;word-break:break-all">{
+  _id: ObjectId,
+  title: String,
+  description: String,
+  assignees: [ObjectId] (ref: User, required),
+  createdBy: ObjectId (ref: User),
+  parentTaskId: ObjectId (ref: Task),
+  isSelfTask: Boolean (default: false),
+  observers: [ObjectId] (ref: User, required),
+  dueDateTime: Date,
+  priority: String (enum: [&#x27;High&#x27;, &#x27;Medium&#x27;, &#x27;Low&#x27;], default: &#x27;Medium&#x27;),
+  status: String (enum: [&#x27;Completed&#x27;, &#x27;In Progress&#x27;, &#x27;Pending&#x27;, &#x27;Overdue&#x27;], default: &#x27;Pending&#x27;),
+  createdAt: Date (auto),
+  updatedAt: Date (auto)
+}</code></pre></div><div style="display:contents" dir="auto"><h3 id="2bb23dc5-31ce-4bc1-ab01-592a4844d85b" class="">Notifications Collection</h3></div><div style="display:contents" dir="auto"><script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js" integrity="sha512-7Z9J3l1+EYfeaPKcGXu3MS/7T+w19WtKQY/n+xzmw4hZhJ9tyYmcUS+4QqAlzhicE5LAfMQSF3iFTK9bQdTxXg==" crossorigin="anonymous" referrerPolicy="no-referrer"></script><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism.min.css" integrity="sha512-tN7Ec6zAFaVSG3TpNAKtk4DOHNpSwKHxxrsiw4GHKESGPs5njn/0sMCUMl2svV4wo4BK/rCP7juYz+zx+l6oeQ==" crossorigin="anonymous" referrerPolicy="no-referrer"/><pre id="9aa3ac60-dfc3-493c-a39b-993b39a07e3c" class="code code-wrap"><code class="language-JavaScript" style="white-space:pre-wrap;word-break:break-all">{
+  _id: ObjectId,
+  userId: ObjectId (ref: User, required),
+  message: String (required),
+  taskId: ObjectId (ref: Task),
+  type: String (enum: [&#x27;taskApproval&#x27;, &#x27;taskRejected&#x27;, &#x27;system&#x27;, &#x27;reminder&#x27;, &#x27;Overdue&#x27;], default: &#x27;system&#x27;),
+  isRead: Boolean (default: false),
+  isSend: Boolean (default: false),
+  resolved: Boolean (default: false),
+  reminderTime: Date,
+  createdAt: Date (default: now),
+  expiresAt: Date (default: now + 2 days),
+  action: {
+    options: [String],
+    chosen: String (enum: [&#x27;approve&#x27;, &#x27;reject&#x27;, null])
+  },
+  dueDateTime: Date (ref: Task),
+  company: ObjectId (ref: Company, required)
+}</code></pre></div><div style="display:contents" dir="auto"><h3 id="c8ce721b-cc75-4592-809e-c9f55767e7fe" class="">Messages Collection</h3></div><div style="display:contents" dir="auto"><script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js" integrity="sha512-7Z9J3l1+EYfeaPKcGXu3MS/7T+w19WtKQY/n+xzmw4hZhJ9tyYmcUS+4QqAlzhicE5LAfMQSF3iFTK9bQdTxXg==" crossorigin="anonymous" referrerPolicy="no-referrer"></script><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism.min.css" integrity="sha512-tN7Ec6zAFaVSG3TpNAKtk4DOHNpSwKHxxrsiw4GHKESGPs5njn/0sMCUMl2svV4wo4BK/rCP7juYz+zx+l6oeQ==" crossorigin="anonymous" referrerPolicy="no-referrer"/><pre id="e8f99e44-79a9-4ee5-92e5-73467b19534c" class="code code-wrap"><code class="language-JavaScript" style="white-space:pre-wrap;word-break:break-all">{
+  _id: ObjectId,
+  userId: ObjectId (ref: User),
+  message: String,
+  company: ObjectId (ref: Company)
+}</code></pre></div><div style="display:contents" dir="auto"><h3 id="dd014708-6121-41de-9bf5-76cb1ca4949d" class="">RecurringTasks Collection</h3></div><div style="display:contents" dir="auto"><script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js" integrity="sha512-7Z9J3l1+EYfeaPKcGXu3MS/7T+w19WtKQY/n+xzmw4hZhJ9tyYmcUS+4QqAlzhicE5LAfMQSF3iFTK9bQdTxXg==" crossorigin="anonymous" referrerPolicy="no-referrer"></script><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism.min.css" integrity="sha512-tN7Ec6zAFaVSG3TpNAKtk4DOHNpSwKHxxrsiw4GHKESGPs5njn/0sMCUMl2svV4wo4BK/rCP7juYz+zx+l6oeQ==" crossorigin="anonymous" referrerPolicy="no-referrer"/><pre id="512162ff-a3ed-4fb5-b3d7-5f4cfb5fa0fe" class="code code-wrap"><code class="language-JavaScript" style="white-space:pre-wrap;word-break:break-all">{
+  _id: ObjectId,
+  taskId: ObjectId (ref: Task),
+  frequency: String (enum: [&#x27;Daily&#x27;, &#x27;Weekly&#x27;, &#x27;Monthly&#x27;, &#x27;3-Months&#x27;]),
+  lastExecuted: Date,
+  nextExecution: Date,
+  isActive: Boolean
+}</code></pre></div><div style="display:contents" dir="auto"><h2 id="58004e47-79f2-4e8e-a83a-873f901708c0" class="">Entity Relationships</h2></div><div style="display:contents" dir="auto"><script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js" integrity="sha512-7Z9J3l1+EYfeaPKcGXu3MS/7T+w19WtKQY/n+xzmw4hZhJ9tyYmcUS+4QqAlzhicE5LAfMQSF3iFTK9bQdTxXg==" crossorigin="anonymous" referrerPolicy="no-referrer"></script><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism.min.css" integrity="sha512-tN7Ec6zAFaVSG3TpNAKtk4DOHNpSwKHxxrsiw4GHKESGPs5njn/0sMCUMl2svV4wo4BK/rCP7juYz+zx+l6oeQ==" crossorigin="anonymous" referrerPolicy="no-referrer"/><pre id="3b713cf0-4727-450d-a26a-9a7af59db408" class="code code-wrap"><code class="language-undefined" style="white-space:pre-wrap;word-break:break-all">Company
+│
+├──&lt; owns &gt;──── User (owners[])
+├──&lt; employs &gt;── User (employees[])
+└──&lt; has &gt;────── Task (company)
+                 Notification (company)
+
+User
+│
+├──&lt; creates &gt;──── Task (createdBy)
+├──&lt; assigned to &gt;── Task (assignees[])
+├──&lt; observes &gt;───── Task (observers[])
+├──&lt; supervises &gt;─── User (subordinates[])
+├──&lt; reports to &gt;─── User (supervisor)
+├──&lt; uploads &gt;────── Document (uploadedBy)
+└──&lt; receives &gt;───── Notification (userId)
+
+Task
+│
+├──&lt; has &gt;───────── Subtask (parentTaskId)
+├──&lt; contains &gt;──── Document (documents[])
+├──&lt; triggers &gt;──── Notification (taskId)
+└──&lt; linked to &gt;─── Notification (notification[].notifId)</code></pre></div><div style="display:contents" dir="auto"><h2 id="3a77556a-998f-44d1-b0af-04a8808aa3b0" class="">Relationship Types</h2></div><div style="display:contents" dir="auto"><h3 id="e021bea3-64c5-4c25-9a42-2dbfc2c875c9" class="">One-to-Many</h3></div><div style="display:contents" dir="auto"><ul id="5f986864-5b46-4244-8b62-77c42d79ae92" class="bulleted-list"><li style="list-style-type:disc">Company → Users (one company has many employees)</li></ul></div><div style="display:contents" dir="auto"><ul id="16568abe-fad8-447d-97a9-56d610b3f889" class="bulleted-list"><li style="list-style-type:disc">Company → Tasks (one company has many tasks)</li></ul></div><div style="display:contents" dir="auto"><ul id="28fb1c01-9648-4854-af40-821a5ac06887" class="bulleted-list"><li style="list-style-type:disc">User → Tasks Created (one user creates many tasks)</li></ul></div><div style="display:contents" dir="auto"><ul id="2c269459-422f-4310-b18b-752482e2a7e4" class="bulleted-list"><li style="list-style-type:disc">Task → Documents (one task has many documents)</li></ul></div><div style="display:contents" dir="auto"><ul id="46839d1c-bb74-4196-bf05-3282b22b3f19" class="bulleted-list"><li style="list-style-type:disc">Task → Notifications (one task triggers many notifications)</li></ul></div><div style="display:contents" dir="auto"><ul id="fe39eb4a-f67c-4f63-940c-6b7bb22e50b4" class="bulleted-list"><li style="list-style-type:disc">Task → Subtasks (one task can have many subtasks)</li></ul></div><div style="display:contents" dir="auto"><h3 id="8d826ba9-dd22-43cc-bc4c-6aab2a880613" class="">Many-to-Many</h3></div><div style="display:contents" dir="auto"><ul id="56c41f9a-8be2-4820-8641-1165a478036f" class="bulleted-list"><li style="list-style-type:disc">Task ↔ Users (assignees) - many tasks assigned to many users</li></ul></div><div style="display:contents" dir="auto"><ul id="fcb24d3d-8efb-4f01-98d1-a0c36a3bf6ca" class="bulleted-list"><li style="list-style-type:disc">Task ↔ Users (observers) - many tasks observed by many users</li></ul></div><div style="display:contents" dir="auto"><ul id="23a362d0-fd2a-44d9-a155-6ecf7adffc8a" class="bulleted-list"><li style="list-style-type:disc">User ↔ User (supervisors/subordinates) - hierarchical relationship</li></ul></div><div style="display:contents" dir="auto"><h2 id="47a9fc8c-e669-4a3e-936d-2256b6e6cda4" class="">Database Indexes</h2></div><div style="display:contents" dir="auto"><script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js" integrity="sha512-7Z9J3l1+EYfeaPKcGXu3MS/7T+w19WtKQY/n+xzmw4hZhJ9tyYmcUS+4QqAlzhicE5LAfMQSF3iFTK9bQdTxXg==" crossorigin="anonymous" referrerPolicy="no-referrer"></script><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism.min.css" integrity="sha512-tN7Ec6zAFaVSG3TpNAKtk4DOHNpSwKHxxrsiw4GHKESGPs5njn/0sMCUMl2svV4wo4BK/rCP7juYz+zx+l6oeQ==" crossorigin="anonymous" referrerPolicy="no-referrer"/><pre id="5b1f5892-b6ce-4442-bccc-30fe0943e0c1" class="code code-wrap"><code class="language-JavaScript" style="white-space:pre-wrap;word-break:break-all">// Users
+users.createIndex({ email: 1 }, { unique: true })
+users.createIndex({ company: 1 })
+users.createIndex({ role: 1 })
+
+// Tasks
+tasks.createIndex({ company: 1 })
+tasks.createIndex({ assignees: 1 })
+tasks.createIndex({ status: 1 })
+tasks.createIndex({ dueDateTime: 1 })
+tasks.createIndex({ createdAt: -1 })
+
+// Notifications
+notifications.createIndex({ userId: 1 })
+notifications.createIndex({ isRead: 1 })
+notifications.createIndex({ expiresAt: 1 }) // TTL index
+
+// Companies
+companies.createIndex({ companyEmail: 1 }, { unique: true })</code></pre></div><div style="display:contents" dir="auto"><h2 id="5812f990-7c57-4401-a94c-3b8ba3b87633" class="">Model Validations</h2></div><div style="display:contents" dir="auto"><h3 id="d7d916c6-7e42-4410-8bc5-78b3f7d275ae" class="">User Model</h3></div><div style="display:contents" dir="auto"><ul id="d2f63aa4-b82b-4332-8920-dbb002eba8c5" class="bulleted-list"><li style="list-style-type:disc">email: Required, unique, email format, lowercase</li></ul></div><div style="display:contents" dir="auto"><ul id="b5343e87-77f6-4bfa-9bd3-5559d45b794b" class="bulleted-list"><li style="list-style-type:disc">password: Required, min 8 chars, hashed with bcrypt</li></ul></div><div style="display:contents" dir="auto"><ul id="8e4b5804-c670-446c-90ad-efbe22d77166" class="bulleted-list"><li style="list-style-type:disc">firstName: Required, max 50 chars, trimmed</li></ul></div><div style="display:contents" dir="auto"><ul id="1291a190-bd39-4231-b4b4-5d78092d9683" class="bulleted-list"><li style="list-style-type:disc">lastName: Required, max 50 chars, trimmed</li></ul></div><div style="display:contents" dir="auto"><ul id="531a384e-39c2-4084-ba90-18c5ac4dcd24" class="bulleted-list"><li style="list-style-type:disc">contactNumber: Optional, international format</li></ul></div><div style="display:contents" dir="auto"><ul id="0e4f3b18-667c-4a50-af38-5f9d1744ed03" class="bulleted-list"><li style="list-style-type:disc">role: Enum [&#x27;admin&#x27;, &#x27;employee&#x27;, &#x27;supervisor&#x27;, &#x27;master-admin&#x27;]</li></ul></div><div style="display:contents" dir="auto"><ul id="38f73981-4f66-404c-8db2-c789465895a6" class="bulleted-list"><li style="list-style-type:disc">company: Required, valid ObjectId</li></ul></div><div style="display:contents" dir="auto"><h3 id="4d36ca37-5afd-4bba-a87c-3281beba6af5" class="">Task Model</h3></div><div style="display:contents" dir="auto"><ul id="2150b33a-ab74-425b-afc2-fad28e15e8a4" class="bulleted-list"><li style="list-style-type:disc">title: Required, max 300 chars</li></ul></div><div style="display:contents" dir="auto"><ul id="b48ff022-1c27-40b7-9ec5-0edfd86efede" class="bulleted-list"><li style="list-style-type:disc">description: Optional, max 2000 chars</li></ul></div><div style="display:contents" dir="auto"><ul id="9dd9f56d-79ee-43c3-9216-70060662f8f1" class="bulleted-list"><li style="list-style-type:disc">assignees: Required, non-empty array</li></ul></div><div style="display:contents" dir="auto"><ul id="23d115cb-47a8-44a8-828a-d6d86cf5e00c" class="bulleted-list"><li style="list-style-type:disc">observers: Required, array</li></ul></div><div style="display:contents" dir="auto"><ul id="e8a09dcc-313f-4334-9ea7-33e51c457c82" class="bulleted-list"><li style="list-style-type:disc">dueDateTime: Required, valid date</li></ul></div><div style="display:contents" dir="auto"><ul id="2005811b-c2d0-40f9-ab65-93d8fdbe762c" class="bulleted-list"><li style="list-style-type:disc">priority: Enum [&#x27;High&#x27;, &#x27;Medium&#x27;, &#x27;Low&#x27;]</li></ul></div><div style="display:contents" dir="auto"><ul id="7a526617-e1b3-4de5-85b1-9f49a50df3b2" class="bulleted-list"><li style="list-style-type:disc">status: Enum [&#x27;Completed&#x27;, &#x27;In Progress&#x27;, &#x27;Pending&#x27;, &#x27;Overdue&#x27;, &#x27;For Approval&#x27;]</li></ul></div><div style="display:contents" dir="auto"><ul id="39834771-2299-4f75-a3fa-103927e0e2c5" class="bulleted-list"><li style="list-style-type:disc">taskType: Enum [&#x27;Single&#x27;, &#x27;Recurring&#x27;]</li></ul></div><div style="display:contents" dir="auto"><ul id="108e4bf7-0151-4f5a-ae6e-5ad6a8046cb2" class="bulleted-list"><li style="list-style-type:disc">company: Required, valid ObjectId</li></ul></div><div style="display:contents" dir="auto"><h3 id="36e044ad-8777-4855-8b2f-c90527973b5e" class="">Notification Model</h3></div><div style="display:contents" dir="auto"><ul id="b553ffbe-e59a-453a-ac9b-0cdd91afbc0e" class="bulleted-list"><li style="list-style-type:disc">userId: Required, valid User ObjectId</li></ul></div><div style="display:contents" dir="auto"><ul id="efc451ba-d860-4f58-89c4-ed8fe6be0ed4" class="bulleted-list"><li style="list-style-type:disc">message: Required, string</li></ul></div><div style="display:contents" dir="auto"><ul id="fd1e81ec-d991-454e-8404-9889a85890d7" class="bulleted-list"><li style="list-style-type:disc">type: Enum [&#x27;taskApproval&#x27;, &#x27;taskRejected&#x27;, &#x27;system&#x27;, &#x27;reminder&#x27;, &#x27;Overdue&#x27;]</li></ul></div><div style="display:contents" dir="auto"><ul id="ee829b67-07b3-4345-b495-db2a1fb2bff4" class="bulleted-list"><li style="list-style-type:disc">expiresAt: Auto-set to 2 days from creation</li></ul></div><div style="display:contents" dir="auto"><ul id="25e9ae32-b294-4759-900e-d84fcd7a3cc5" class="bulleted-list"><li style="list-style-type:disc">company: Required, valid Company ObjectId</li></ul></div></div></article><span class="sans" style="font-size:14px;padding-top:2em"></span></body></html>

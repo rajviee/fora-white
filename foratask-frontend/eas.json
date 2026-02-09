@@ -1,0 +1,39 @@
+{
+  "cli": {
+    "version": ">= 3.0.0"
+  },
+  "build": {
+    "preview": {
+      "distribution": "internal",
+      "env": {
+        "EXPO_PUBLIC_API_URL": "http://192.168.0.103:3000",
+        "EXPO_PUBLIC_ENCRYPT_KEY": "forataskencryptkey",
+        "EXPO_PUBLIC_SIGN_KEY": "foratasksignkey"
+      },
+      "android": {
+        "buildType": "apk"
+      }
+    },
+    "development": {
+      "distribution": "internal",
+      "env": {
+        "EXPO_PUBLIC_API_URL": "https://fora.laptoponrent.biz/api",
+        "EXPO_PUBLIC_ENCRYPT_KEY": "forataskencryptkey",
+        "EXPO_PUBLIC_SIGN_KEY": "foratasksignkey"
+      },
+      "android": {
+        "buildType": "apk"
+      }
+    },
+    "production": {
+      "env": {
+        "EXPO_PUBLIC_API_URL": "https://fora.laptoponrent.biz/api",
+        "EXPO_PUBLIC_ENCRYPT_KEY": "forataskencryptkey",
+        "EXPO_PUBLIC_SIGN_KEY": "foratasksignkey"
+      },
+      "android": {
+        "buildType": "app-bundle"
+      }
+    }
+  }
+}

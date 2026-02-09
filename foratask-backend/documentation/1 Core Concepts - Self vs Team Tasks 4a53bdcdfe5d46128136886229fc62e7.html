@@ -1,0 +1,740 @@
+<html><head><meta http-equiv="Content-Type" content="text/html; charset=utf-8"/><title>1. Core Concepts - Self vs Team Tasks</title><style>
+/* cspell:disable-file */
+/* webkit printing magic: print all background colors */
+html {
+	-webkit-print-color-adjust: exact;
+}
+* {
+	box-sizing: border-box;
+	-webkit-print-color-adjust: exact;
+}
+
+html,
+body {
+	margin: 0;
+	padding: 0;
+}
+@media only screen {
+	body {
+		margin: 2em auto;
+		max-width: 900px;
+		color: rgb(55, 53, 47);
+	}
+}
+
+body {
+	line-height: 1.5;
+	white-space: pre-wrap;
+}
+
+a,
+a.visited {
+	color: inherit;
+	text-decoration: underline;
+}
+
+.pdf-relative-link-path {
+	font-size: 80%;
+	color: #444;
+}
+
+h1,
+h2,
+h3 {
+	letter-spacing: -0.01em;
+	line-height: 1.2;
+	font-weight: 600;
+	margin-bottom: 0;
+}
+
+/* Override strong tags inside headings to maintain consistent weight */
+h1 strong,
+h2 strong,
+h3 strong {
+	font-weight: 600;
+}
+
+.page-title {
+	font-size: 2.5rem;
+	font-weight: 700;
+	margin-top: 0;
+	margin-bottom: 0.75em;
+}
+
+h1 {
+	font-size: 1.875rem;
+	margin-top: 1.875rem;
+}
+
+h2 {
+	font-size: 1.5rem;
+	margin-top: 1.5rem;
+}
+
+h3 {
+	font-size: 1.25rem;
+	margin-top: 1.25rem;
+}
+
+.source {
+	border: 1px solid #ddd;
+	border-radius: 3px;
+	padding: 1.5em;
+	word-break: break-all;
+}
+
+.callout {
+	border-radius: 10px;
+	padding: 1rem;
+}
+
+figure {
+	margin: 1.25em 0;
+	page-break-inside: avoid;
+}
+
+figcaption {
+	opacity: 0.5;
+	font-size: 85%;
+	margin-top: 0.5em;
+}
+
+mark {
+	background-color: transparent;
+}
+
+.indented {
+	padding-left: 1.5em;
+}
+
+hr {
+	background: transparent;
+	display: block;
+	width: 100%;
+	height: 1px;
+	visibility: visible;
+	border: none;
+	border-bottom: 1px solid rgba(55, 53, 47, 0.09);
+}
+
+img {
+	max-width: 100%;
+}
+
+@media only print {
+	img {
+		max-height: 100vh;
+		object-fit: contain;
+	}
+}
+
+@page {
+	margin: 1in;
+}
+
+.collection-content {
+	font-size: 0.875rem;
+}
+
+.collection-content td {
+	white-space: pre-wrap;
+	word-break: break-word;
+}
+
+.column-list {
+	display: flex;
+	justify-content: space-between;
+}
+
+.column {
+	padding: 0 1em;
+}
+
+.column:first-child {
+	padding-left: 0;
+}
+
+.column:last-child {
+	padding-right: 0;
+}
+
+.table_of_contents-item {
+	display: block;
+	font-size: 0.875rem;
+	line-height: 1.3;
+	padding: 0.125rem;
+}
+
+.table_of_contents-indent-1 {
+	margin-left: 1.5rem;
+}
+
+.table_of_contents-indent-2 {
+	margin-left: 3rem;
+}
+
+.table_of_contents-indent-3 {
+	margin-left: 4.5rem;
+}
+
+.table_of_contents-link {
+	text-decoration: none;
+	opacity: 0.7;
+	border-bottom: 1px solid rgba(55, 53, 47, 0.18);
+}
+
+table,
+th,
+td {
+	border: 1px solid rgba(55, 53, 47, 0.09);
+	border-collapse: collapse;
+}
+
+table {
+	border-left: none;
+	border-right: none;
+}
+
+th,
+td {
+	font-weight: normal;
+	padding: 0.25em 0.5em;
+	line-height: 1.5;
+	min-height: 1.5em;
+	text-align: left;
+}
+
+th {
+	color: rgba(55, 53, 47, 0.6);
+}
+
+ol,
+ul {
+	margin: 0;
+	margin-block-start: 0.6em;
+	margin-block-end: 0.6em;
+}
+
+li > ol:first-child,
+li > ul:first-child {
+	margin-block-start: 0.6em;
+}
+
+ul > li {
+	list-style: disc;
+}
+
+ul.to-do-list {
+	padding-inline-start: 0;
+}
+
+ul.to-do-list > li {
+	list-style: none;
+}
+
+.to-do-children-checked {
+	text-decoration: line-through;
+	opacity: 0.375;
+}
+
+ul.toggle > li {
+	list-style: none;
+}
+
+ul {
+	padding-inline-start: 1.7em;
+}
+
+ul > li {
+	padding-left: 0.1em;
+}
+
+ol {
+	padding-inline-start: 1.6em;
+}
+
+ol > li {
+	padding-left: 0.2em;
+}
+
+.mono ol {
+	padding-inline-start: 2em;
+}
+
+.mono ol > li {
+	text-indent: -0.4em;
+}
+
+.toggle {
+	padding-inline-start: 0em;
+	list-style-type: none;
+}
+
+/* Indent toggle children */
+.toggle > li > details {
+	padding-left: 1.7em;
+}
+
+.toggle > li > details > summary {
+	margin-left: -1.1em;
+}
+
+.selected-value {
+	display: inline-block;
+	padding: 0 0.5em;
+	background: rgba(206, 205, 202, 0.5);
+	border-radius: 3px;
+	margin-right: 0.5em;
+	margin-top: 0.3em;
+	margin-bottom: 0.3em;
+	white-space: nowrap;
+}
+
+.collection-title {
+	display: inline-block;
+	margin-right: 1em;
+}
+
+.page-description {
+	margin-bottom: 2em;
+}
+
+.simple-table {
+	margin-top: 1em;
+	font-size: 0.875rem;
+	empty-cells: show;
+}
+.simple-table td {
+	height: 29px;
+	min-width: 120px;
+}
+
+.simple-table th {
+	height: 29px;
+	min-width: 120px;
+}
+
+.simple-table-header-color {
+	background: rgb(247, 246, 243);
+	color: black;
+}
+.simple-table-header {
+	font-weight: 500;
+}
+
+time {
+	opacity: 0.5;
+}
+
+.icon {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	max-width: 1.2em;
+	max-height: 1.2em;
+	text-decoration: none;
+	vertical-align: text-bottom;
+	margin-right: 0.5em;
+}
+
+img.icon {
+	border-radius: 3px;
+}
+
+.callout img.notion-static-icon {
+	width: 1em;
+	height: 1em;
+}
+
+.callout p {
+	margin: 0;
+}
+
+.callout h1,
+.callout h2,
+.callout h3 {
+	margin: 0 0 0.6rem;
+}
+
+.user-icon {
+	width: 1.5em;
+	height: 1.5em;
+	border-radius: 100%;
+	margin-right: 0.5rem;
+}
+
+.user-icon-inner {
+	font-size: 0.8em;
+}
+
+.text-icon {
+	border: 1px solid #000;
+	text-align: center;
+}
+
+.page-cover-image {
+	display: block;
+	object-fit: cover;
+	width: 100%;
+	max-height: 30vh;
+}
+
+.page-header-icon {
+	font-size: 3rem;
+	margin-bottom: 1rem;
+}
+
+.page-header-icon-with-cover {
+	margin-top: -0.72em;
+	margin-left: 0.07em;
+}
+
+.page-header-icon img {
+	border-radius: 3px;
+}
+
+.link-to-page {
+	margin: 1em 0;
+	padding: 0;
+	border: none;
+	font-weight: 500;
+}
+
+p > .user {
+	opacity: 0.5;
+}
+
+td > .user,
+td > time {
+	white-space: nowrap;
+}
+
+input[type="checkbox"] {
+	transform: scale(1.5);
+	margin-right: 0.6em;
+	vertical-align: middle;
+}
+
+p {
+	margin-top: 0.5em;
+	margin-bottom: 0.5em;
+}
+
+.image {
+	border: none;
+	margin: 1.5em 0;
+	padding: 0;
+	border-radius: 0;
+	text-align: center;
+}
+
+.code,
+code {
+	background: rgba(135, 131, 120, 0.15);
+	border-radius: 3px;
+	padding: 0.2em 0.4em;
+	border-radius: 3px;
+	font-size: 85%;
+	tab-size: 2;
+}
+
+code {
+	color: #eb5757;
+}
+
+.code {
+	padding: 1.5em 1em;
+}
+
+.code-wrap {
+	white-space: pre-wrap;
+	word-break: break-all;
+}
+
+.code > code {
+	background: none;
+	padding: 0;
+	font-size: 100%;
+	color: inherit;
+}
+
+blockquote {
+	font-size: 1em;
+	margin: 1em 0;
+	padding-left: 1em;
+	border-left: 3px solid rgb(55, 53, 47);
+}
+
+blockquote.quote-large {
+	font-size: 1.25em;
+}
+
+.bookmark {
+	text-decoration: none;
+	max-height: 8em;
+	padding: 0;
+	display: flex;
+	width: 100%;
+	align-items: stretch;
+}
+
+.bookmark-title {
+	font-size: 0.85em;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	height: 1.75em;
+	white-space: nowrap;
+}
+
+.bookmark-text {
+	display: flex;
+	flex-direction: column;
+}
+
+.bookmark-info {
+	flex: 4 1 180px;
+	padding: 12px 14px 14px;
+	display: flex;
+	flex-direction: column;
+	justify-content: space-between;
+}
+
+.bookmark-image {
+	width: 33%;
+	flex: 1 1 180px;
+	display: block;
+	position: relative;
+	object-fit: cover;
+	border-radius: 1px;
+}
+
+.bookmark-description {
+	color: rgba(55, 53, 47, 0.6);
+	font-size: 0.75em;
+	overflow: hidden;
+	max-height: 4.5em;
+	word-break: break-word;
+}
+
+.bookmark-href {
+	font-size: 0.75em;
+	margin-top: 0.25em;
+}
+
+.sans { font-family: ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI Variable Display", "Segoe UI", Helvetica, "Apple Color Emoji", "Noto Sans Arabic", "Noto Sans Hebrew", Arial, sans-serif, "Segoe UI Emoji", "Segoe UI Symbol"; }
+.code { font-family: "SFMono-Regular", Menlo, Consolas, "PT Mono", "Liberation Mono", Courier, monospace; }
+.serif { font-family: Lyon-Text, Georgia, ui-serif, serif; }
+.mono { font-family: iawriter-mono, Nitti, Menlo, Courier, monospace; }
+.pdf .sans { font-family: Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI Variable Display", "Segoe UI", Helvetica, "Apple Color Emoji", "Noto Sans Arabic", "Noto Sans Hebrew", Arial, sans-serif, "Segoe UI Emoji", "Segoe UI Symbol", 'Twemoji', 'Noto Color Emoji', 'Noto Sans CJK JP'; }
+.pdf:lang(zh-CN) .sans { font-family: Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI Variable Display", "Segoe UI", Helvetica, "Apple Color Emoji", "Noto Sans Arabic", "Noto Sans Hebrew", Arial, sans-serif, "Segoe UI Emoji", "Segoe UI Symbol", 'Twemoji', 'Noto Color Emoji', 'Noto Sans CJK SC'; }
+.pdf:lang(zh-TW) .sans { font-family: Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI Variable Display", "Segoe UI", Helvetica, "Apple Color Emoji", "Noto Sans Arabic", "Noto Sans Hebrew", Arial, sans-serif, "Segoe UI Emoji", "Segoe UI Symbol", 'Twemoji', 'Noto Color Emoji', 'Noto Sans CJK TC'; }
+.pdf:lang(ko-KR) .sans { font-family: Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI Variable Display", "Segoe UI", Helvetica, "Apple Color Emoji", "Noto Sans Arabic", "Noto Sans Hebrew", Arial, sans-serif, "Segoe UI Emoji", "Segoe UI Symbol", 'Twemoji', 'Noto Color Emoji', 'Noto Sans CJK KR'; }
+.pdf .code { font-family: Source Code Pro, "SFMono-Regular", Menlo, Consolas, "PT Mono", "Liberation Mono", Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK JP'; }
+.pdf:lang(zh-CN) .code { font-family: Source Code Pro, "SFMono-Regular", Menlo, Consolas, "PT Mono", "Liberation Mono", Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK SC'; }
+.pdf:lang(zh-TW) .code { font-family: Source Code Pro, "SFMono-Regular", Menlo, Consolas, "PT Mono", "Liberation Mono", Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK TC'; }
+.pdf:lang(ko-KR) .code { font-family: Source Code Pro, "SFMono-Regular", Menlo, Consolas, "PT Mono", "Liberation Mono", Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK KR'; }
+.pdf .serif { font-family: PT Serif, Lyon-Text, Georgia, ui-serif, serif, 'Twemoji', 'Noto Color Emoji', 'Noto Serif CJK JP'; }
+.pdf:lang(zh-CN) .serif { font-family: PT Serif, Lyon-Text, Georgia, ui-serif, serif, 'Twemoji', 'Noto Color Emoji', 'Noto Serif CJK SC'; }
+.pdf:lang(zh-TW) .serif { font-family: PT Serif, Lyon-Text, Georgia, ui-serif, serif, 'Twemoji', 'Noto Color Emoji', 'Noto Serif CJK TC'; }
+.pdf:lang(ko-KR) .serif { font-family: PT Serif, Lyon-Text, Georgia, ui-serif, serif, 'Twemoji', 'Noto Color Emoji', 'Noto Serif CJK KR'; }
+.pdf .mono { font-family: PT Mono, iawriter-mono, Nitti, Menlo, Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK JP'; }
+.pdf:lang(zh-CN) .mono { font-family: PT Mono, iawriter-mono, Nitti, Menlo, Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK SC'; }
+.pdf:lang(zh-TW) .mono { font-family: PT Mono, iawriter-mono, Nitti, Menlo, Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK TC'; }
+.pdf:lang(ko-KR) .mono { font-family: PT Mono, iawriter-mono, Nitti, Menlo, Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK KR'; }
+.highlight-default {
+	color: rgba(44, 44, 43, 1);
+}
+.highlight-gray {
+	color: rgba(125, 122, 117, 1);
+	fill: rgba(125, 122, 117, 1);
+}
+.highlight-brown {
+	color: rgba(159, 118, 90, 1);
+	fill: rgba(159, 118, 90, 1);
+}
+.highlight-orange {
+	color: rgba(210, 123, 45, 1);
+	fill: rgba(210, 123, 45, 1);
+}
+.highlight-yellow {
+	color: rgba(203, 148, 52, 1);
+	fill: rgba(203, 148, 52, 1);
+}
+.highlight-teal {
+	color: rgba(80, 148, 110, 1);
+	fill: rgba(80, 148, 110, 1);
+}
+.highlight-blue {
+	color: rgba(56, 125, 201, 1);
+	fill: rgba(56, 125, 201, 1);
+}
+.highlight-purple {
+	color: rgba(154, 107, 180, 1);
+	fill: rgba(154, 107, 180, 1);
+}
+.highlight-pink {
+	color: rgba(193, 76, 138, 1);
+	fill: rgba(193, 76, 138, 1);
+}
+.highlight-red {
+	color: rgba(207, 81, 72, 1);
+	fill: rgba(207, 81, 72, 1);
+}
+.highlight-default_background {
+	color: rgba(44, 44, 43, 1);
+}
+.highlight-gray_background {
+	background: rgba(42, 28, 0, 0.07);
+}
+.highlight-brown_background {
+	background: rgba(139, 46, 0, 0.086);
+}
+.highlight-orange_background {
+	background: rgba(224, 101, 1, 0.129);
+}
+.highlight-yellow_background {
+	background: rgba(211, 168, 0, 0.137);
+}
+.highlight-teal_background {
+	background: rgba(0, 100, 45, 0.09);
+}
+.highlight-blue_background {
+	background: rgba(0, 124, 215, 0.094);
+}
+.highlight-purple_background {
+	background: rgba(102, 0, 178, 0.078);
+}
+.highlight-pink_background {
+	background: rgba(197, 0, 93, 0.086);
+}
+.highlight-red_background {
+	background: rgba(223, 22, 0, 0.094);
+}
+.block-color-default {
+	color: inherit;
+	fill: inherit;
+}
+.block-color-gray {
+	color: rgba(125, 122, 117, 1);
+	fill: rgba(125, 122, 117, 1);
+}
+.block-color-brown {
+	color: rgba(159, 118, 90, 1);
+	fill: rgba(159, 118, 90, 1);
+}
+.block-color-orange {
+	color: rgba(210, 123, 45, 1);
+	fill: rgba(210, 123, 45, 1);
+}
+.block-color-yellow {
+	color: rgba(203, 148, 52, 1);
+	fill: rgba(203, 148, 52, 1);
+}
+.block-color-teal {
+	color: rgba(80, 148, 110, 1);
+	fill: rgba(80, 148, 110, 1);
+}
+.block-color-blue {
+	color: rgba(56, 125, 201, 1);
+	fill: rgba(56, 125, 201, 1);
+}
+.block-color-purple {
+	color: rgba(154, 107, 180, 1);
+	fill: rgba(154, 107, 180, 1);
+}
+.block-color-pink {
+	color: rgba(193, 76, 138, 1);
+	fill: rgba(193, 76, 138, 1);
+}
+.block-color-red {
+	color: rgba(207, 81, 72, 1);
+	fill: rgba(207, 81, 72, 1);
+}
+.block-color-default_background {
+	color: inherit;
+	fill: inherit;
+}
+.block-color-gray_background {
+	background: rgba(240, 239, 237, 1);
+}
+.block-color-brown_background {
+	background: rgba(245, 237, 233, 1);
+}
+.block-color-orange_background {
+	background: rgba(251, 235, 222, 1);
+}
+.block-color-yellow_background {
+	background: rgba(249, 243, 220, 1);
+}
+.block-color-teal_background {
+	background: rgba(232, 241, 236, 1);
+}
+.block-color-blue_background {
+	background: rgba(229, 242, 252, 1);
+}
+.block-color-purple_background {
+	background: rgba(243, 235, 249, 1);
+}
+.block-color-pink_background {
+	background: rgba(250, 233, 241, 1);
+}
+.block-color-red_background {
+	background: rgba(252, 233, 231, 1);
+}
+.select-value-color-default { background-color: rgba(42, 28, 0, 0.07); }
+.select-value-color-gray { background-color: rgba(28, 19, 1, 0.11); }
+.select-value-color-brown { background-color: rgba(127, 51, 0, 0.156); }
+.select-value-color-orange { background-color: rgba(196, 88, 0, 0.203); }
+.select-value-color-yellow { background-color: rgba(209, 156, 0, 0.282); }
+.select-value-color-green { background-color: rgba(0, 96, 38, 0.156); }
+.select-value-color-blue { background-color: rgba(0, 118, 217, 0.203); }
+.select-value-color-purple { background-color: rgba(92, 0, 163, 0.141); }
+.select-value-color-pink { background-color: rgba(183, 0, 78, 0.152); }
+.select-value-color-red { background-color: rgba(206, 24, 0, 0.164); }
+
+.checkbox {
+	display: inline-flex;
+	vertical-align: text-bottom;
+	width: 16;
+	height: 16;
+	background-size: 16px;
+	margin-left: 2px;
+	margin-right: 5px;
+}
+
+.checkbox-on {
+	background-image: url("data:image/svg+xml;charset=UTF-8,%3Csvg%20width%3D%2216%22%20height%3D%2216%22%20viewBox%3D%220%200%2016%2016%22%20fill%3D%22none%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%3E%0A%3Crect%20width%3D%2216%22%20height%3D%2216%22%20fill%3D%22%2358A9D7%22%2F%3E%0A%3Cpath%20d%3D%22M6.71429%2012.2852L14%204.9995L12.7143%203.71436L6.71429%209.71378L3.28571%206.2831L2%207.57092L6.71429%2012.2852Z%22%20fill%3D%22white%22%2F%3E%0A%3C%2Fsvg%3E");
+}
+
+.checkbox-off {
+	background-image: url("data:image/svg+xml;charset=UTF-8,%3Csvg%20width%3D%2216%22%20height%3D%2216%22%20viewBox%3D%220%200%2016%2016%22%20fill%3D%22none%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%3E%0A%3Crect%20x%3D%220.75%22%20y%3D%220.75%22%20width%3D%2214.5%22%20height%3D%2214.5%22%20fill%3D%22white%22%20stroke%3D%22%2336352F%22%20stroke-width%3D%221.5%22%2F%3E%0A%3C%2Fsvg%3E");
+}
+	
+</style></head><body><article id="4a53bdcd-fe5d-4612-8136-886229fc62e7" class="page sans"><header><div class="page-header-icon undefined"><span class="icon">📋</span></div><h1 class="page-title" dir="auto">1. Core Concepts - Self vs Team Tasks</h1><p class="page-description" dir="auto"></p></header><div class="page-body"><div style="display:contents" dir="auto"><h1 id="d9f35210-a301-466b-a5f9-4c3bf74fe8ce" class="">CRITICAL CONCEPT: SELF TASK vs TEAM TASK LOGIC</h1></div><div style="display:contents" dir="auto"><p id="692e4627-97fd-4e68-b6e2-5711f9862ced" class="">The application has a FUNDAMENTAL distinction between &quot;Self Tasks&quot; and &quot;Team Tasks&quot;. This <code>isSelfTask</code> flag controls task visibility, filtering, permissions, and reporting throughout the entire system.</p></div><div style="display:contents" dir="auto"><h2 id="8ed4dfd0-b5b1-462a-80c6-7e8629f82236" class="">WHAT IS A SELF TASK? (isSelfTask=true)</h2></div><div style="display:contents" dir="auto"><p id="e5264b4c-d505-4cf9-ae47-a2f736c2350d" class="">A task where:</p></div><div style="display:contents" dir="auto"><ul id="700fd17a-965d-4614-9688-0e89895de73c" class="bulleted-list"><li style="list-style-type:disc">Exactly ONE assignee AND exactly ONE observer</li></ul></div><div style="display:contents" dir="auto"><ul id="96ab273f-39e5-48b4-92a2-f1cd5b0d049a" class="bulleted-list"><li style="list-style-type:disc">Both are the SAME person (the task creator)</li></ul></div><div style="display:contents" dir="auto"><ul id="24a2ac57-f371-45b2-a7ea-d17103c12eb6" class="bulleted-list"><li style="list-style-type:disc">Automatically calculated at creation:</li></ul></div><div style="display:contents" dir="auto"><script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js" integrity="sha512-7Z9J3l1+EYfeaPKcGXu3MS/7T+w19WtKQY/n+xzmw4hZhJ9tyYmcUS+4QqAlzhicE5LAfMQSF3iFTK9bQdTxXg==" crossorigin="anonymous" referrerPolicy="no-referrer"></script><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism.min.css" integrity="sha512-tN7Ec6zAFaVSG3TpNAKtk4DOHNpSwKHxxrsiw4GHKESGPs5njn/0sMCUMl2svV4wo4BK/rCP7juYz+zx+l6oeQ==" crossorigin="anonymous" referrerPolicy="no-referrer"/><pre id="986be925-b066-4e86-a674-d80287df2fe9" class="code code-wrap"><code class="language-JavaScript" style="white-space:pre-wrap;word-break:break-all">const selfTask = assignees.length === 1 &amp;&amp; observers.length === 1 &amp;&amp;
+  assignees[0] === req.user.id &amp;&amp; observers[0] === req.user.id;
+task.isSelfTask = selfTask;</code></pre></div><div style="display:contents" dir="auto"><p id="94f94fa9-cd3f-4703-9b2c-f0f4652524c3" class=""><strong>Example</strong>: Admin creates &quot;Buy groceries&quot; and assigns it only to themselves (they are both the only assignee and only observer)</p></div><div style="display:contents" dir="auto"><h2 id="b856a312-435e-41cf-9900-ffab56a0fc22" class="">WHAT IS A TEAM TASK? (isSelfTask=false)</h2></div><div style="display:contents" dir="auto"><p id="abcba134-50b9-4d02-be2a-97791e7b2f18" class="">A task where:</p></div><div style="display:contents" dir="auto"><ul id="b2a54bbf-78e0-4d98-9d12-863ee7da8b9a" class="bulleted-list"><li style="list-style-type:disc">Multiple assignees, OR</li></ul></div><div style="display:contents" dir="auto"><ul id="d7f2ff9e-d610-4104-869d-66652f72ea78" class="bulleted-list"><li style="list-style-type:disc">Multiple observers, OR</li></ul></div><div style="display:contents" dir="auto"><ul id="19ff01a4-e816-444f-bb8f-1c661b6b8443" class="bulleted-list"><li style="list-style-type:disc">Assignee ≠ observer (different people)</li></ul></div><div style="display:contents" dir="auto"><p id="f66fb6eb-87f9-4729-b502-32c1dd743942" class=""><strong>Example</strong>: Admin creates &quot;Complete Q1 report&quot; assigned to 3 employees with Admin as the observer</p></div><div style="display:contents" dir="auto"><h2 id="045792a7-97fb-4cc2-ae03-70e534be34a1" class="">WHY THIS DISTINCTION EXISTS</h2></div><div style="display:contents" dir="auto"><ol type="1" id="326d5845-c9c2-4038-bdc0-b8c48ea3cc6a" class="numbered-list" start="1"><li><strong>PRIVACY</strong>: Self tasks are completely private to the creator. No one else sees them.</li></ol></div><div style="display:contents" dir="auto"><ol type="1" id="802c536a-57ae-42d2-9c4b-04f121b3c4ac" class="numbered-list" start="2"><li><strong>ORGANIZATION</strong>: Separates personal tasks from team collaboration work</li></ol></div><div style="display:contents" dir="auto"><ol type="1" id="26044f5c-c2a8-4cc3-a0d5-a47cefa92b69" class="numbered-list" start="3"><li><strong>REPORTING</strong>: Completely separate report views for self vs team tasks</li></ol></div><div style="display:contents" dir="auto"><ol type="1" id="aaf610d1-2070-4126-891a-a86927a0ef73" class="numbered-list" start="4"><li><strong>FILTERING</strong>: Users toggle between viewing their personal tasks vs team tasks</li></ol></div><div style="display:contents" dir="auto"><h2 id="e0e43094-a360-4cfb-8111-037294363f13" class="">BACKEND LOGIC IMPLEMENTATION</h2></div><div style="display:contents" dir="auto"><h3 id="1b5f7aab-9a50-4b0b-9008-d438c4277cac" class="">Task Creation</h3></div><div style="display:contents" dir="auto"><script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js" integrity="sha512-7Z9J3l1+EYfeaPKcGXu3MS/7T+w19WtKQY/n+xzmw4hZhJ9tyYmcUS+4QqAlzhicE5LAfMQSF3iFTK9bQdTxXg==" crossorigin="anonymous" referrerPolicy="no-referrer"></script><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism.min.css" integrity="sha512-tN7Ec6zAFaVSG3TpNAKtk4DOHNpSwKHxxrsiw4GHKESGPs5njn/0sMCUMl2svV4wo4BK/rCP7juYz+zx+l6oeQ==" crossorigin="anonymous" referrerPolicy="no-referrer"/><pre id="7baaac26-3e57-41b0-aa42-65e3912fb630" class="code code-wrap"><code class="language-JavaScript" style="white-space:pre-wrap;word-break:break-all">// taskController.createTask
+// Automatically calculates isSelfTask based on assignees/observers
+// Stores boolean flag in task document</code></pre></div><div style="display:contents" dir="auto"><h3 id="48328362-3bb5-4d9b-9a54-f8b80554ddc3" class="">Task Retrieval</h3></div><div style="display:contents" dir="auto"><script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js" integrity="sha512-7Z9J3l1+EYfeaPKcGXu3MS/7T+w19WtKQY/n+xzmw4hZhJ9tyYmcUS+4QqAlzhicE5LAfMQSF3iFTK9bQdTxXg==" crossorigin="anonymous" referrerPolicy="no-referrer"></script><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism.min.css" integrity="sha512-tN7Ec6zAFaVSG3TpNAKtk4DOHNpSwKHxxrsiw4GHKESGPs5njn/0sMCUMl2svV4wo4BK/rCP7juYz+zx+l6oeQ==" crossorigin="anonymous" referrerPolicy="no-referrer"/><pre id="b99e479d-a09c-484e-b46e-fe2f19e224a6" class="code code-wrap"><code class="language-JavaScript" style="white-space:pre-wrap;word-break:break-all">// taskController.getTaskList
+// Frontend sends query parameter: ?isSelfTask=true OR ?isSelfTask=false
+// Backend filters completely differently based on this flag</code></pre></div><div style="display:contents" dir="auto"><h3 id="139e05bc-743d-415f-9b51-3f12f6bc062b" class="">For SELF TASKS (isSelfTask=true)</h3></div><div style="display:contents" dir="auto"><script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js" integrity="sha512-7Z9J3l1+EYfeaPKcGXu3MS/7T+w19WtKQY/n+xzmw4hZhJ9tyYmcUS+4QqAlzhicE5LAfMQSF3iFTK9bQdTxXg==" crossorigin="anonymous" referrerPolicy="no-referrer"></script><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism.min.css" integrity="sha512-tN7Ec6zAFaVSG3TpNAKtk4DOHNpSwKHxxrsiw4GHKESGPs5njn/0sMCUMl2svV4wo4BK/rCP7juYz+zx+l6oeQ==" crossorigin="anonymous" referrerPolicy="no-referrer"/><pre id="4f8ac4a3-4dc1-4dc5-8843-7621c70c90f6" class="code code-wrap"><code class="language-JavaScript" style="white-space:pre-wrap;word-break:break-all">Database Query: {
+  isSelfTask: true,
+  createdBy: userId,      // ONLY creator can see their self tasks
+  company: companyId
+}
+Result: User sees ONLY their own personal tasks</code></pre></div><div style="display:contents" dir="auto"><h3 id="f04fcfb9-76e0-41ec-85c2-031b02c5f76c" class="">For TEAM TASKS (isSelfTask=false)</h3></div><div style="display:contents" dir="auto"><p id="931dd0ab-8815-4b01-b5cb-f2f03bac389f" class=""><strong>If user is ADMIN</strong>:</p></div><div style="display:contents" dir="auto"><script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js" integrity="sha512-7Z9J3l1+EYfeaPKcGXu3MS/7T+w19WtKQY/n+xzmw4hZhJ9tyYmcUS+4QqAlzhicE5LAfMQSF3iFTK9bQdTxXg==" crossorigin="anonymous" referrerPolicy="no-referrer"></script><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism.min.css" integrity="sha512-tN7Ec6zAFaVSG3TpNAKtk4DOHNpSwKHxxrsiw4GHKESGPs5njn/0sMCUMl2svV4wo4BK/rCP7juYz+zx+l6oeQ==" crossorigin="anonymous" referrerPolicy="no-referrer"/><pre id="a4cf8dd9-2fa9-4ffb-931e-2cf343067a1f" class="code code-wrap"><code class="language-JavaScript" style="white-space:pre-wrap;word-break:break-all">Database Query: {
+  isSelfTask: false,
+  company: companyId    // Admin sees ALL company team tasks
+}
+Result: Admin sees all team tasks in the company</code></pre></div><div style="display:contents" dir="auto"><p id="9f3df2ad-a8f7-47ba-a4b3-9f7bad0efd15" class=""><strong>If user is EMPLOYEE/SUPERVISOR</strong>:</p></div><div style="display:contents" dir="auto"><script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js" integrity="sha512-7Z9J3l1+EYfeaPKcGXu3MS/7T+w19WtKQY/n+xzmw4hZhJ9tyYmcUS+4QqAlzhicE5LAfMQSF3iFTK9bQdTxXg==" crossorigin="anonymous" referrerPolicy="no-referrer"></script><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism.min.css" integrity="sha512-tN7Ec6zAFaVSG3TpNAKtk4DOHNpSwKHxxrsiw4GHKESGPs5njn/0sMCUMl2svV4wo4BK/rCP7juYz+zx+l6oeQ==" crossorigin="anonymous" referrerPolicy="no-referrer"/><pre id="119f86a4-79e9-4fe6-a169-7e85aff73d27" class="code code-wrap"><code class="language-JavaScript" style="white-space:pre-wrap;word-break:break-all">Database Query: {
+  isSelfTask: false,
+  company: companyId,
+  $or: [
+    { assignees: userId },    // Tasks assigned to them
+    { observers: userId },    // Tasks they&#x27;re observing
+    { createdBy: userId }     // Tasks they created
+  ]
+}
+Result: Employee sees only team tasks they&#x27;re involved in</code></pre></div><div style="display:contents" dir="auto"><h2 id="729b3622-9641-4a3b-bdfa-e745cfd243ba" class="">FRONTEND BEHAVIOR</h2></div><div style="display:contents" dir="auto"><ul id="3b635371-cfe8-49e0-a5fc-83a8ad492a67" class="bulleted-list"><li style="list-style-type:disc">Dashboard and Task screens have &quot;Self&quot; vs &quot;Team&quot; toggle/tabs</li></ul></div><div style="display:contents" dir="auto"><ul id="67070c09-0ade-43c9-971f-6225618e5b19" class="bulleted-list"><li style="list-style-type:disc">Clicking &quot;Self&quot; sends API request with <code>?isSelfTask=true</code></li></ul></div><div style="display:contents" dir="auto"><ul id="c3fffb4f-1cce-43d0-8271-747797c2cd6a" class="bulleted-list"><li style="list-style-type:disc">Clicking &quot;Team&quot; sends API request with <code>?isSelfTask=false</code></li></ul></div><div style="display:contents" dir="auto"><ul id="6697735e-0d34-4316-900a-2a2ada6ba18e" class="bulleted-list"><li style="list-style-type:disc">User sees COMPLETELY DIFFERENT task lists based on this flag</li></ul></div><div style="display:contents" dir="auto"><ul id="d9957618-bbb8-4b5f-98e1-9a53825ffc19" class="bulleted-list"><li style="list-style-type:disc">The two lists never overlap</li></ul></div><div style="display:contents" dir="auto"><h2 id="7b5fe65c-c712-4a94-86b6-0f37a3690ec7" class="">PERMISSION RULES</h2></div><div style="display:contents" dir="auto"><h3 id="6cefe482-24c1-482e-9816-79b00ac50aba" class="">SELF TASKS:</h3></div><div style="display:contents" dir="auto"><ul id="77651ade-6c19-4e70-b327-7ba1bac2adc4" class="bulleted-list"><li style="list-style-type:disc"><strong>Creator</strong>: Full access (view, edit, delete, complete)</li></ul></div><div style="display:contents" dir="auto"><ul id="12be95b2-508e-4ca2-9d10-842f0ed8677d" class="bulleted-list"><li style="list-style-type:disc"><strong>Everyone else</strong>: CANNOT see the task at all (total privacy)</li></ul></div><div style="display:contents" dir="auto"><h3 id="1a44216b-29aa-445e-8d87-50b835fc5b03" class="">TEAM TASKS:</h3></div><div style="display:contents" dir="auto"><ul id="83ffa573-0648-48bc-90d7-63c446104100" class="bulleted-list"><li style="list-style-type:disc"><strong>Admin</strong>: Can view, edit, delete ALL company team tasks</li></ul></div><div style="display:contents" dir="auto"><ul id="65e5eada-9576-4de2-81fb-78804e151a73" class="bulleted-list"><li style="list-style-type:disc"><strong>Observer</strong>: Can view task, approve/reject task completion</li></ul></div><div style="display:contents" dir="auto"><ul id="396179a8-f14a-400a-add4-51d5eb81d1a4" class="bulleted-list"><li style="list-style-type:disc"><strong>Assignee</strong>: Can view, edit (limited fields), mark as complete (triggers approval)</li></ul></div><div style="display:contents" dir="auto"><ul id="dfafc6bb-5b12-4ccb-8a12-00db77201438" class="bulleted-list"><li style="list-style-type:disc"><strong>Creator</strong>: Can view, cannot edit unless they are Observer</li></ul></div><div style="display:contents" dir="auto"><ul id="a2fe6a77-a821-48ab-94a0-3f12d51fffe8" class="bulleted-list"><li style="list-style-type:disc"><strong>Other users</strong>: Cannot see tasks they&#x27;re not part of</li></ul></div><div style="display:contents" dir="auto"><ul id="8e6610bc-2a0c-4c30-a353-a8cb9bf54d16" class="bulleted-list"><li style="list-style-type:disc"><strong>If a user is both Assignee and Observer</strong>: Observer role is considered</li></ul></div><div style="display:contents" dir="auto"><h2 id="122a6777-5443-4558-a355-202d361b7b61" class="">TASK COMPLETION WORKFLOW</h2></div><div style="display:contents" dir="auto"><h3 id="8f50120b-a795-428c-9355-0a34b8df0564" class="">SELF TASK Completion:</h3></div><div style="display:contents" dir="auto"><ol type="1" id="eaf68aac-c668-4a88-8577-27e68db50ed7" class="numbered-list" start="1"><li>Creator marks task as complete</li></ol></div><div style="display:contents" dir="auto"><ol type="1" id="46efaf14-d414-40dd-bc08-37457d0e6242" class="numbered-list" start="2"><li>Status IMMEDIATELY becomes &quot;Completed&quot; (no approval needed)</li></ol></div><div style="display:contents" dir="auto"><h3 id="3640803b-8496-4593-8a58-30b5ef5057f7" class="">TEAM TASK Completion (by Assignee):</h3></div><div style="display:contents" dir="auto"><ol type="1" id="3b6501a5-1094-4525-be97-6d7b68f95b28" class="numbered-list" start="1"><li>Assignee marks task as complete</li></ol></div><div style="display:contents" dir="auto"><ol type="1" id="2841c9b4-91ac-43c8-9d27-0f043ad9bb17" class="numbered-list" start="2"><li>Status becomes &quot;Completed&quot; for assignee but &quot;For Approval&quot; for observer/admin</li></ol></div><div style="display:contents" dir="auto"><ol type="1" id="28390b79-d8ad-40d8-88f8-b63f36d410f3" class="numbered-list" start="3"><li>If user is both assignee and observer, status shows &quot;For Approval&quot;</li></ol></div><div style="display:contents" dir="auto"><ol type="1" id="321f2137-70f5-4cf2-8aeb-764d6f97ab43" class="numbered-list" start="4"><li>Notification sent to ALL observers</li></ol></div><div style="display:contents" dir="auto"><ol type="1" id="ba1ed0d8-6bba-4e01-8377-673765b1d923" class="numbered-list" start="5"><li>Observer approves → Status becomes &quot;Completed&quot;</li></ol></div><div style="display:contents" dir="auto"><ol type="1" id="984bb40b-c3e2-47e4-be94-5e6264490aa8" class="numbered-list" start="6"><li>Observer rejects → Status returns to Pending state</li></ol></div><div style="display:contents" dir="auto"><h3 id="da0927b5-d0d5-4aed-8a21-ab00ed621d70" class="">TEAM TASK Completion (by Observer or Admin):</h3></div><div style="display:contents" dir="auto"><ol type="1" id="af2ecb18-c49e-45f1-9f65-cf8ff2f2f03c" class="numbered-list" start="1"><li>Observer/Admin marks task as complete</li></ol></div><div style="display:contents" dir="auto"><ol type="1" id="4d3bd838-37a1-4969-82ce-a3d7bfa4c085" class="numbered-list" start="2"><li>Status IMMEDIATELY becomes &quot;Completed&quot; (no approval needed)</li></ol></div><div style="display:contents" dir="auto"><h2 id="87338fd2-deb9-49b2-9771-f2e2e6002c0f" class="">REPORTING &amp; STATISTICS</h2></div><div style="display:contents" dir="auto"><p id="c08fd7a0-4c8d-4039-8e2a-9b87071b0076" class="">The system maintains separate reporting for self and team tasks:</p></div><div style="display:contents" dir="auto"><h3 id="a6af6b5a-6d32-4ff1-ba13-02ac4b81daf1" class="">Admin Report (<code>/reports/admin-report-summary</code>)</h3></div><div style="display:contents" dir="auto"><ul id="5ba6f1fc-feb1-4dc9-8a6b-b72b2d2eca15" class="bulleted-list"><li style="list-style-type:disc">Shows ONLY Team Tasks (isSelfTask=false)</li></ul></div><div style="display:contents" dir="auto"><ul id="371d698a-bb9b-4985-97d6-7e1241a56b1f" class="bulleted-list"><li style="list-style-type:disc">Aggregates data across all employees</li></ul></div><div style="display:contents" dir="auto"><ul id="76d67966-f2af-46e7-bae2-bdd37e0d3165" class="bulleted-list"><li style="list-style-type:disc">Used for company-wide performance metrics</li></ul></div><div style="display:contents" dir="auto"><h3 id="2471e2b5-a68d-41a5-bb56-bb7c58f14213" class="">Self Report (<code>/reports/self-report-summary</code>)</h3></div><div style="display:contents" dir="auto"><ul id="8299ac7c-d993-4ef3-8cb2-dccfeb755cad" class="bulleted-list"><li style="list-style-type:disc">Shows ONLY Self Tasks (isSelfTask=true)</li></ul></div><div style="display:contents" dir="auto"><ul id="94abe184-c389-4d27-8ab8-c054c1b3573c" class="bulleted-list"><li style="list-style-type:disc">Shows only the logged-in user&#x27;s personal tasks</li></ul></div><div style="display:contents" dir="auto"><ul id="ecc014f8-8060-4c3f-8b89-d04617867d15" class="bulleted-list"><li style="list-style-type:disc">Used for personal task tracking</li></ul></div><div style="display:contents" dir="auto"><h3 id="9885b98c-b802-4580-9873-5e7e1db7f6fa" class="">Dashboard Statistics</h3></div><div style="display:contents" dir="auto"><ul id="e52d3956-33ef-4ccf-9dde-57158f247ca0" class="bulleted-list"><li style="list-style-type:disc">Calculated separately for Self and Team tasks</li></ul></div><div style="display:contents" dir="auto"><ul id="0f7b1cf6-e001-4811-a76d-c260c68cfe36" class="bulleted-list"><li style="list-style-type:disc">User toggles between &quot;Self&quot; and &quot;Team&quot; views</li></ul></div><div style="display:contents" dir="auto"><ul id="7bc1434e-3fcc-4c7f-9804-8c3dd12bdd55" class="bulleted-list"><li style="list-style-type:disc">Charts and graphs update based on selected view</li></ul></div><div style="display:contents" dir="auto"><h2 id="c48a4259-5496-42d6-946f-b942b3e444a6" class="">IMPORTANT EDGE CASES</h2></div><div style="display:contents" dir="auto"><ol type="1" id="73506b5d-3957-474c-97de-2428b0f9837f" class="numbered-list" start="1"><li>Admin creating task for only themselves = Self Task (even though they&#x27;re admin, if <code>assignees[0] === observers[0] === adminId</code>)</li></ol></div><div style="display:contents" dir="auto"><ol type="1" id="49ef7418-b614-482d-9c73-bf5396e79abe" class="numbered-list" start="2"><li>Editing a Team Task and removing all assignees except yourself does NOT automatically convert it to a Self Task. The <code>isSelfTask</code> flag is generally set at creation and doesn&#x27;t auto-update.</li></ol></div><div style="display:contents" dir="auto"><ol type="1" id="e2b26eda-9965-451a-b9a3-74a4a40710c2" class="numbered-list" start="3"><li>Self Tasks do NOT appear in:<div style="display:contents" dir="auto"><ul id="93e07ef4-64da-47d8-8367-9ea2cc207290" class="bulleted-list"><li style="list-style-type:disc">Admin&#x27;s team task view or list</li></ul></div><div style="display:contents" dir="auto"><ul id="99ed2321-b0dd-469d-967b-17912454e19c" class="bulleted-list"><li style="list-style-type:disc">Admin Report (company-wide reports)</li></ul></div><div style="display:contents" dir="auto"><ul id="d2ad8ac5-c4d4-406c-b737-4678e913346e" class="bulleted-list"><li style="list-style-type:disc">Company statistics for team tasks</li></ul></div><div style="display:contents" dir="auto"><ul id="fc28d5cd-30e7-483b-a371-91e75958dad8" class="bulleted-list"><li style="list-style-type:disc">Other users&#x27; task lists or searches</li></ul></div></li></ol></div><div style="display:contents" dir="auto"><ol type="1" id="e6dec3b1-9d22-47a6-8ff0-1eede16466df" class="numbered-list" start="4"><li>You CANNOT convert a Self Task to Team Task or vice versa after creation (the <code>isSelfTask</code> flag is immutable in most controllers)</li></ol></div><div style="display:contents" dir="auto"><ol type="1" id="a24be561-eed7-4da1-9444-f8463838f3e0" class="numbered-list" start="5"><li>When searching or filtering tasks, the <code>isSelfTask</code> parameter MUST be specified or you&#x27;ll get validation errors from the backend</li></ol></div><div style="display:contents" dir="auto"><h2 id="cddfedc8-efb3-4a2b-aeaf-f1fb2ba95fe6" class="">CODE LOCATIONS</h2></div><div style="display:contents" dir="auto"><p id="c2b42f86-6d62-4c40-ab9b-939d63a1ad9f" class=""><strong>Backend</strong>:</p></div><div style="display:contents" dir="auto"><ul id="952c52cb-d69a-44b7-91e2-c7257d578294" class="bulleted-list"><li style="list-style-type:disc">Task creation logic: <code>controllers/taskController.js</code> → <code>createTask()</code></li></ul></div><div style="display:contents" dir="auto"><ul id="9d9e0848-b68d-4c61-b7fe-b14793479c4a" class="bulleted-list"><li style="list-style-type:disc">Task retrieval logic: <code>controllers/taskController.js</code> → <code>getTaskList()</code></li></ul></div><div style="display:contents" dir="auto"><ul id="a22de930-93c1-4c19-9596-831728cc9adf" class="bulleted-list"><li style="list-style-type:disc">Self report: <code>controllers/reportController.js</code> → <code>selfReportSummary()</code></li></ul></div><div style="display:contents" dir="auto"><ul id="762202e8-69c9-4b8b-9ff0-84d5b3c426c2" class="bulleted-list"><li style="list-style-type:disc">Admin report: <code>controllers/reportController.js</code> → <code>adminReportSummary()</code></li></ul></div><div style="display:contents" dir="auto"><ul id="28a0e3b5-991f-4fc9-8679-d495bfbb0279" class="bulleted-list"><li style="list-style-type:disc">Statistics: <code>controllers/statsController.js</code> (all functions use isSelfTask parameter)</li></ul></div><div style="display:contents" dir="auto"><p id="7320cfa5-4a27-405b-a720-807bb78bd852" class=""><strong>Frontend</strong>:</p></div><div style="display:contents" dir="auto"><ul id="5eec0496-a48a-4d7c-a8cc-a301abffa35b" class="bulleted-list"><li style="list-style-type:disc">Dashboard toggle: <code>screens/Dashboard.js</code></li></ul></div><div style="display:contents" dir="auto"><ul id="18d88598-edff-4cf0-b554-60be1dc01413" class="bulleted-list"><li style="list-style-type:disc">Task list toggle: <code>screens/Task/TaskList.js</code></li></ul></div><div style="display:contents" dir="auto"><ul id="5fc6dc27-b18b-42b9-b1f0-de2c677c2734" class="bulleted-list"><li style="list-style-type:disc">Reports: <code>screens/Reports/</code> (AdminReport.js vs EmployeeReport.js)</li></ul></div><div style="display:contents" dir="auto"><h2 id="a4718b8c-e8fd-4221-a6aa-d0515316e0a0" class="">DATABASE FIELD</h2></div><div style="display:contents" dir="auto"><p id="bc3fe6bc-5a35-416f-a784-bb482d48e008" class="">In the Task schema (<code>models/task.js</code>):</p></div><div style="display:contents" dir="auto"><script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js" integrity="sha512-7Z9J3l1+EYfeaPKcGXu3MS/7T+w19WtKQY/n+xzmw4hZhJ9tyYmcUS+4QqAlzhicE5LAfMQSF3iFTK9bQdTxXg==" crossorigin="anonymous" referrerPolicy="no-referrer"></script><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism.min.css" integrity="sha512-tN7Ec6zAFaVSG3TpNAKtk4DOHNpSwKHxxrsiw4GHKESGPs5njn/0sMCUMl2svV4wo4BK/rCP7juYz+zx+l6oeQ==" crossorigin="anonymous" referrerPolicy="no-referrer"/><pre id="0bb0d2f9-86f7-4722-8a63-7ee38d6783d0" class="code code-wrap"><code class="language-JavaScript" style="white-space:pre-wrap;word-break:break-all">isSelfTask: {
+  type: Boolean,
+  default: false
+}</code></pre></div><div style="display:contents" dir="auto"><p id="430e5dd5-db46-447b-a130-d0bd2dd6a890" class="">This boolean is the single source of truth for task privacy and visibility.</p></div></div></article><span class="sans" style="font-size:14px;padding-top:2em"></span></body></html>

@@ -1,0 +1,819 @@
+<html><head><meta http-equiv="Content-Type" content="text/html; charset=utf-8"/><title>4. Backend Documentation</title><style>
+/* cspell:disable-file */
+/* webkit printing magic: print all background colors */
+html {
+	-webkit-print-color-adjust: exact;
+}
+* {
+	box-sizing: border-box;
+	-webkit-print-color-adjust: exact;
+}
+
+html,
+body {
+	margin: 0;
+	padding: 0;
+}
+@media only screen {
+	body {
+		margin: 2em auto;
+		max-width: 900px;
+		color: rgb(55, 53, 47);
+	}
+}
+
+body {
+	line-height: 1.5;
+	white-space: pre-wrap;
+}
+
+a,
+a.visited {
+	color: inherit;
+	text-decoration: underline;
+}
+
+.pdf-relative-link-path {
+	font-size: 80%;
+	color: #444;
+}
+
+h1,
+h2,
+h3 {
+	letter-spacing: -0.01em;
+	line-height: 1.2;
+	font-weight: 600;
+	margin-bottom: 0;
+}
+
+/* Override strong tags inside headings to maintain consistent weight */
+h1 strong,
+h2 strong,
+h3 strong {
+	font-weight: 600;
+}
+
+.page-title {
+	font-size: 2.5rem;
+	font-weight: 700;
+	margin-top: 0;
+	margin-bottom: 0.75em;
+}
+
+h1 {
+	font-size: 1.875rem;
+	margin-top: 1.875rem;
+}
+
+h2 {
+	font-size: 1.5rem;
+	margin-top: 1.5rem;
+}
+
+h3 {
+	font-size: 1.25rem;
+	margin-top: 1.25rem;
+}
+
+.source {
+	border: 1px solid #ddd;
+	border-radius: 3px;
+	padding: 1.5em;
+	word-break: break-all;
+}
+
+.callout {
+	border-radius: 10px;
+	padding: 1rem;
+}
+
+figure {
+	margin: 1.25em 0;
+	page-break-inside: avoid;
+}
+
+figcaption {
+	opacity: 0.5;
+	font-size: 85%;
+	margin-top: 0.5em;
+}
+
+mark {
+	background-color: transparent;
+}
+
+.indented {
+	padding-left: 1.5em;
+}
+
+hr {
+	background: transparent;
+	display: block;
+	width: 100%;
+	height: 1px;
+	visibility: visible;
+	border: none;
+	border-bottom: 1px solid rgba(55, 53, 47, 0.09);
+}
+
+img {
+	max-width: 100%;
+}
+
+@media only print {
+	img {
+		max-height: 100vh;
+		object-fit: contain;
+	}
+}
+
+@page {
+	margin: 1in;
+}
+
+.collection-content {
+	font-size: 0.875rem;
+}
+
+.collection-content td {
+	white-space: pre-wrap;
+	word-break: break-word;
+}
+
+.column-list {
+	display: flex;
+	justify-content: space-between;
+}
+
+.column {
+	padding: 0 1em;
+}
+
+.column:first-child {
+	padding-left: 0;
+}
+
+.column:last-child {
+	padding-right: 0;
+}
+
+.table_of_contents-item {
+	display: block;
+	font-size: 0.875rem;
+	line-height: 1.3;
+	padding: 0.125rem;
+}
+
+.table_of_contents-indent-1 {
+	margin-left: 1.5rem;
+}
+
+.table_of_contents-indent-2 {
+	margin-left: 3rem;
+}
+
+.table_of_contents-indent-3 {
+	margin-left: 4.5rem;
+}
+
+.table_of_contents-link {
+	text-decoration: none;
+	opacity: 0.7;
+	border-bottom: 1px solid rgba(55, 53, 47, 0.18);
+}
+
+table,
+th,
+td {
+	border: 1px solid rgba(55, 53, 47, 0.09);
+	border-collapse: collapse;
+}
+
+table {
+	border-left: none;
+	border-right: none;
+}
+
+th,
+td {
+	font-weight: normal;
+	padding: 0.25em 0.5em;
+	line-height: 1.5;
+	min-height: 1.5em;
+	text-align: left;
+}
+
+th {
+	color: rgba(55, 53, 47, 0.6);
+}
+
+ol,
+ul {
+	margin: 0;
+	margin-block-start: 0.6em;
+	margin-block-end: 0.6em;
+}
+
+li > ol:first-child,
+li > ul:first-child {
+	margin-block-start: 0.6em;
+}
+
+ul > li {
+	list-style: disc;
+}
+
+ul.to-do-list {
+	padding-inline-start: 0;
+}
+
+ul.to-do-list > li {
+	list-style: none;
+}
+
+.to-do-children-checked {
+	text-decoration: line-through;
+	opacity: 0.375;
+}
+
+ul.toggle > li {
+	list-style: none;
+}
+
+ul {
+	padding-inline-start: 1.7em;
+}
+
+ul > li {
+	padding-left: 0.1em;
+}
+
+ol {
+	padding-inline-start: 1.6em;
+}
+
+ol > li {
+	padding-left: 0.2em;
+}
+
+.mono ol {
+	padding-inline-start: 2em;
+}
+
+.mono ol > li {
+	text-indent: -0.4em;
+}
+
+.toggle {
+	padding-inline-start: 0em;
+	list-style-type: none;
+}
+
+/* Indent toggle children */
+.toggle > li > details {
+	padding-left: 1.7em;
+}
+
+.toggle > li > details > summary {
+	margin-left: -1.1em;
+}
+
+.selected-value {
+	display: inline-block;
+	padding: 0 0.5em;
+	background: rgba(206, 205, 202, 0.5);
+	border-radius: 3px;
+	margin-right: 0.5em;
+	margin-top: 0.3em;
+	margin-bottom: 0.3em;
+	white-space: nowrap;
+}
+
+.collection-title {
+	display: inline-block;
+	margin-right: 1em;
+}
+
+.page-description {
+	margin-bottom: 2em;
+}
+
+.simple-table {
+	margin-top: 1em;
+	font-size: 0.875rem;
+	empty-cells: show;
+}
+.simple-table td {
+	height: 29px;
+	min-width: 120px;
+}
+
+.simple-table th {
+	height: 29px;
+	min-width: 120px;
+}
+
+.simple-table-header-color {
+	background: rgb(247, 246, 243);
+	color: black;
+}
+.simple-table-header {
+	font-weight: 500;
+}
+
+time {
+	opacity: 0.5;
+}
+
+.icon {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	max-width: 1.2em;
+	max-height: 1.2em;
+	text-decoration: none;
+	vertical-align: text-bottom;
+	margin-right: 0.5em;
+}
+
+img.icon {
+	border-radius: 3px;
+}
+
+.callout img.notion-static-icon {
+	width: 1em;
+	height: 1em;
+}
+
+.callout p {
+	margin: 0;
+}
+
+.callout h1,
+.callout h2,
+.callout h3 {
+	margin: 0 0 0.6rem;
+}
+
+.user-icon {
+	width: 1.5em;
+	height: 1.5em;
+	border-radius: 100%;
+	margin-right: 0.5rem;
+}
+
+.user-icon-inner {
+	font-size: 0.8em;
+}
+
+.text-icon {
+	border: 1px solid #000;
+	text-align: center;
+}
+
+.page-cover-image {
+	display: block;
+	object-fit: cover;
+	width: 100%;
+	max-height: 30vh;
+}
+
+.page-header-icon {
+	font-size: 3rem;
+	margin-bottom: 1rem;
+}
+
+.page-header-icon-with-cover {
+	margin-top: -0.72em;
+	margin-left: 0.07em;
+}
+
+.page-header-icon img {
+	border-radius: 3px;
+}
+
+.link-to-page {
+	margin: 1em 0;
+	padding: 0;
+	border: none;
+	font-weight: 500;
+}
+
+p > .user {
+	opacity: 0.5;
+}
+
+td > .user,
+td > time {
+	white-space: nowrap;
+}
+
+input[type="checkbox"] {
+	transform: scale(1.5);
+	margin-right: 0.6em;
+	vertical-align: middle;
+}
+
+p {
+	margin-top: 0.5em;
+	margin-bottom: 0.5em;
+}
+
+.image {
+	border: none;
+	margin: 1.5em 0;
+	padding: 0;
+	border-radius: 0;
+	text-align: center;
+}
+
+.code,
+code {
+	background: rgba(135, 131, 120, 0.15);
+	border-radius: 3px;
+	padding: 0.2em 0.4em;
+	border-radius: 3px;
+	font-size: 85%;
+	tab-size: 2;
+}
+
+code {
+	color: #eb5757;
+}
+
+.code {
+	padding: 1.5em 1em;
+}
+
+.code-wrap {
+	white-space: pre-wrap;
+	word-break: break-all;
+}
+
+.code > code {
+	background: none;
+	padding: 0;
+	font-size: 100%;
+	color: inherit;
+}
+
+blockquote {
+	font-size: 1em;
+	margin: 1em 0;
+	padding-left: 1em;
+	border-left: 3px solid rgb(55, 53, 47);
+}
+
+blockquote.quote-large {
+	font-size: 1.25em;
+}
+
+.bookmark {
+	text-decoration: none;
+	max-height: 8em;
+	padding: 0;
+	display: flex;
+	width: 100%;
+	align-items: stretch;
+}
+
+.bookmark-title {
+	font-size: 0.85em;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	height: 1.75em;
+	white-space: nowrap;
+}
+
+.bookmark-text {
+	display: flex;
+	flex-direction: column;
+}
+
+.bookmark-info {
+	flex: 4 1 180px;
+	padding: 12px 14px 14px;
+	display: flex;
+	flex-direction: column;
+	justify-content: space-between;
+}
+
+.bookmark-image {
+	width: 33%;
+	flex: 1 1 180px;
+	display: block;
+	position: relative;
+	object-fit: cover;
+	border-radius: 1px;
+}
+
+.bookmark-description {
+	color: rgba(55, 53, 47, 0.6);
+	font-size: 0.75em;
+	overflow: hidden;
+	max-height: 4.5em;
+	word-break: break-word;
+}
+
+.bookmark-href {
+	font-size: 0.75em;
+	margin-top: 0.25em;
+}
+
+.sans { font-family: ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI Variable Display", "Segoe UI", Helvetica, "Apple Color Emoji", "Noto Sans Arabic", "Noto Sans Hebrew", Arial, sans-serif, "Segoe UI Emoji", "Segoe UI Symbol"; }
+.code { font-family: "SFMono-Regular", Menlo, Consolas, "PT Mono", "Liberation Mono", Courier, monospace; }
+.serif { font-family: Lyon-Text, Georgia, ui-serif, serif; }
+.mono { font-family: iawriter-mono, Nitti, Menlo, Courier, monospace; }
+.pdf .sans { font-family: Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI Variable Display", "Segoe UI", Helvetica, "Apple Color Emoji", "Noto Sans Arabic", "Noto Sans Hebrew", Arial, sans-serif, "Segoe UI Emoji", "Segoe UI Symbol", 'Twemoji', 'Noto Color Emoji', 'Noto Sans CJK JP'; }
+.pdf:lang(zh-CN) .sans { font-family: Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI Variable Display", "Segoe UI", Helvetica, "Apple Color Emoji", "Noto Sans Arabic", "Noto Sans Hebrew", Arial, sans-serif, "Segoe UI Emoji", "Segoe UI Symbol", 'Twemoji', 'Noto Color Emoji', 'Noto Sans CJK SC'; }
+.pdf:lang(zh-TW) .sans { font-family: Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI Variable Display", "Segoe UI", Helvetica, "Apple Color Emoji", "Noto Sans Arabic", "Noto Sans Hebrew", Arial, sans-serif, "Segoe UI Emoji", "Segoe UI Symbol", 'Twemoji', 'Noto Color Emoji', 'Noto Sans CJK TC'; }
+.pdf:lang(ko-KR) .sans { font-family: Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI Variable Display", "Segoe UI", Helvetica, "Apple Color Emoji", "Noto Sans Arabic", "Noto Sans Hebrew", Arial, sans-serif, "Segoe UI Emoji", "Segoe UI Symbol", 'Twemoji', 'Noto Color Emoji', 'Noto Sans CJK KR'; }
+.pdf .code { font-family: Source Code Pro, "SFMono-Regular", Menlo, Consolas, "PT Mono", "Liberation Mono", Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK JP'; }
+.pdf:lang(zh-CN) .code { font-family: Source Code Pro, "SFMono-Regular", Menlo, Consolas, "PT Mono", "Liberation Mono", Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK SC'; }
+.pdf:lang(zh-TW) .code { font-family: Source Code Pro, "SFMono-Regular", Menlo, Consolas, "PT Mono", "Liberation Mono", Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK TC'; }
+.pdf:lang(ko-KR) .code { font-family: Source Code Pro, "SFMono-Regular", Menlo, Consolas, "PT Mono", "Liberation Mono", Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK KR'; }
+.pdf .serif { font-family: PT Serif, Lyon-Text, Georgia, ui-serif, serif, 'Twemoji', 'Noto Color Emoji', 'Noto Serif CJK JP'; }
+.pdf:lang(zh-CN) .serif { font-family: PT Serif, Lyon-Text, Georgia, ui-serif, serif, 'Twemoji', 'Noto Color Emoji', 'Noto Serif CJK SC'; }
+.pdf:lang(zh-TW) .serif { font-family: PT Serif, Lyon-Text, Georgia, ui-serif, serif, 'Twemoji', 'Noto Color Emoji', 'Noto Serif CJK TC'; }
+.pdf:lang(ko-KR) .serif { font-family: PT Serif, Lyon-Text, Georgia, ui-serif, serif, 'Twemoji', 'Noto Color Emoji', 'Noto Serif CJK KR'; }
+.pdf .mono { font-family: PT Mono, iawriter-mono, Nitti, Menlo, Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK JP'; }
+.pdf:lang(zh-CN) .mono { font-family: PT Mono, iawriter-mono, Nitti, Menlo, Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK SC'; }
+.pdf:lang(zh-TW) .mono { font-family: PT Mono, iawriter-mono, Nitti, Menlo, Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK TC'; }
+.pdf:lang(ko-KR) .mono { font-family: PT Mono, iawriter-mono, Nitti, Menlo, Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK KR'; }
+.highlight-default {
+	color: rgba(44, 44, 43, 1);
+}
+.highlight-gray {
+	color: rgba(125, 122, 117, 1);
+	fill: rgba(125, 122, 117, 1);
+}
+.highlight-brown {
+	color: rgba(159, 118, 90, 1);
+	fill: rgba(159, 118, 90, 1);
+}
+.highlight-orange {
+	color: rgba(210, 123, 45, 1);
+	fill: rgba(210, 123, 45, 1);
+}
+.highlight-yellow {
+	color: rgba(203, 148, 52, 1);
+	fill: rgba(203, 148, 52, 1);
+}
+.highlight-teal {
+	color: rgba(80, 148, 110, 1);
+	fill: rgba(80, 148, 110, 1);
+}
+.highlight-blue {
+	color: rgba(56, 125, 201, 1);
+	fill: rgba(56, 125, 201, 1);
+}
+.highlight-purple {
+	color: rgba(154, 107, 180, 1);
+	fill: rgba(154, 107, 180, 1);
+}
+.highlight-pink {
+	color: rgba(193, 76, 138, 1);
+	fill: rgba(193, 76, 138, 1);
+}
+.highlight-red {
+	color: rgba(207, 81, 72, 1);
+	fill: rgba(207, 81, 72, 1);
+}
+.highlight-default_background {
+	color: rgba(44, 44, 43, 1);
+}
+.highlight-gray_background {
+	background: rgba(42, 28, 0, 0.07);
+}
+.highlight-brown_background {
+	background: rgba(139, 46, 0, 0.086);
+}
+.highlight-orange_background {
+	background: rgba(224, 101, 1, 0.129);
+}
+.highlight-yellow_background {
+	background: rgba(211, 168, 0, 0.137);
+}
+.highlight-teal_background {
+	background: rgba(0, 100, 45, 0.09);
+}
+.highlight-blue_background {
+	background: rgba(0, 124, 215, 0.094);
+}
+.highlight-purple_background {
+	background: rgba(102, 0, 178, 0.078);
+}
+.highlight-pink_background {
+	background: rgba(197, 0, 93, 0.086);
+}
+.highlight-red_background {
+	background: rgba(223, 22, 0, 0.094);
+}
+.block-color-default {
+	color: inherit;
+	fill: inherit;
+}
+.block-color-gray {
+	color: rgba(125, 122, 117, 1);
+	fill: rgba(125, 122, 117, 1);
+}
+.block-color-brown {
+	color: rgba(159, 118, 90, 1);
+	fill: rgba(159, 118, 90, 1);
+}
+.block-color-orange {
+	color: rgba(210, 123, 45, 1);
+	fill: rgba(210, 123, 45, 1);
+}
+.block-color-yellow {
+	color: rgba(203, 148, 52, 1);
+	fill: rgba(203, 148, 52, 1);
+}
+.block-color-teal {
+	color: rgba(80, 148, 110, 1);
+	fill: rgba(80, 148, 110, 1);
+}
+.block-color-blue {
+	color: rgba(56, 125, 201, 1);
+	fill: rgba(56, 125, 201, 1);
+}
+.block-color-purple {
+	color: rgba(154, 107, 180, 1);
+	fill: rgba(154, 107, 180, 1);
+}
+.block-color-pink {
+	color: rgba(193, 76, 138, 1);
+	fill: rgba(193, 76, 138, 1);
+}
+.block-color-red {
+	color: rgba(207, 81, 72, 1);
+	fill: rgba(207, 81, 72, 1);
+}
+.block-color-default_background {
+	color: inherit;
+	fill: inherit;
+}
+.block-color-gray_background {
+	background: rgba(240, 239, 237, 1);
+}
+.block-color-brown_background {
+	background: rgba(245, 237, 233, 1);
+}
+.block-color-orange_background {
+	background: rgba(251, 235, 222, 1);
+}
+.block-color-yellow_background {
+	background: rgba(249, 243, 220, 1);
+}
+.block-color-teal_background {
+	background: rgba(232, 241, 236, 1);
+}
+.block-color-blue_background {
+	background: rgba(229, 242, 252, 1);
+}
+.block-color-purple_background {
+	background: rgba(243, 235, 249, 1);
+}
+.block-color-pink_background {
+	background: rgba(250, 233, 241, 1);
+}
+.block-color-red_background {
+	background: rgba(252, 233, 231, 1);
+}
+.select-value-color-default { background-color: rgba(42, 28, 0, 0.07); }
+.select-value-color-gray { background-color: rgba(28, 19, 1, 0.11); }
+.select-value-color-brown { background-color: rgba(127, 51, 0, 0.156); }
+.select-value-color-orange { background-color: rgba(196, 88, 0, 0.203); }
+.select-value-color-yellow { background-color: rgba(209, 156, 0, 0.282); }
+.select-value-color-green { background-color: rgba(0, 96, 38, 0.156); }
+.select-value-color-blue { background-color: rgba(0, 118, 217, 0.203); }
+.select-value-color-purple { background-color: rgba(92, 0, 163, 0.141); }
+.select-value-color-pink { background-color: rgba(183, 0, 78, 0.152); }
+.select-value-color-red { background-color: rgba(206, 24, 0, 0.164); }
+
+.checkbox {
+	display: inline-flex;
+	vertical-align: text-bottom;
+	width: 16;
+	height: 16;
+	background-size: 16px;
+	margin-left: 2px;
+	margin-right: 5px;
+}
+
+.checkbox-on {
+	background-image: url("data:image/svg+xml;charset=UTF-8,%3Csvg%20width%3D%2216%22%20height%3D%2216%22%20viewBox%3D%220%200%2016%2016%22%20fill%3D%22none%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%3E%0A%3Crect%20width%3D%2216%22%20height%3D%2216%22%20fill%3D%22%2358A9D7%22%2F%3E%0A%3Cpath%20d%3D%22M6.71429%2012.2852L14%204.9995L12.7143%203.71436L6.71429%209.71378L3.28571%206.2831L2%207.57092L6.71429%2012.2852Z%22%20fill%3D%22white%22%2F%3E%0A%3C%2Fsvg%3E");
+}
+
+.checkbox-off {
+	background-image: url("data:image/svg+xml;charset=UTF-8,%3Csvg%20width%3D%2216%22%20height%3D%2216%22%20viewBox%3D%220%200%2016%2016%22%20fill%3D%22none%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%3E%0A%3Crect%20x%3D%220.75%22%20y%3D%220.75%22%20width%3D%2214.5%22%20height%3D%2214.5%22%20fill%3D%22white%22%20stroke%3D%22%2336352F%22%20stroke-width%3D%221.5%22%2F%3E%0A%3C%2Fsvg%3E");
+}
+	
+</style></head><body><article id="17bcaa24-b7d9-44f2-8560-41b4dcc4609c" class="page sans"><header><div class="page-header-icon undefined"><span class="icon">🔧</span></div><h1 class="page-title" dir="auto">4. Backend Documentation</h1><p class="page-description" dir="auto"></p></header><div class="page-body"><div style="display:contents" dir="auto"><h1 id="0a15c133-aee5-46dd-bd82-9dfb6ec2972c" class="">Backend Documentation</h1></div><div style="display:contents" dir="auto"><h2 id="87ce6485-811a-43ea-b6b2-21bd27813d79" class="">Project Structure</h2></div><div style="display:contents" dir="auto"><script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js" integrity="sha512-7Z9J3l1+EYfeaPKcGXu3MS/7T+w19WtKQY/n+xzmw4hZhJ9tyYmcUS+4QqAlzhicE5LAfMQSF3iFTK9bQdTxXg==" crossorigin="anonymous" referrerPolicy="no-referrer"></script><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism.min.css" integrity="sha512-tN7Ec6zAFaVSG3TpNAKtk4DOHNpSwKHxxrsiw4GHKESGPs5njn/0sMCUMl2svV4wo4BK/rCP7juYz+zx+l6oeQ==" crossorigin="anonymous" referrerPolicy="no-referrer"/><pre id="3f39b30f-0264-48b1-a68d-9fa76c543a36" class="code code-wrap"><code class="language-undefined" style="white-space:pre-wrap;word-break:break-all">foratask-backend/
+├── server.js                     # Main entry point with Socket.io
+├── index.js                      # Basic server starter
+├── config/                       # Configuration files
+├── controllers/                  # Business logic (6 files)
+│   ├── adminController.js        # Employee management
+│   ├── taskController.js         # Task CRUD operations
+│   ├── userController.js         # User profile management
+│   ├── notificationController.js # Notification handling
+│   ├── statsController.js        # Statistics and analytics
+│   └── reportController.js       # Report generation
+├── models/                       # Mongoose schemas (7 files)
+│   ├── user.js
+│   ├── company.js
+│   ├── task.js
+│   ├── subtask.js
+│   ├── notification.js
+│   ├── message.js
+│   └── recurringTask.js
+├── routes/                       # API route definitions (7 files)
+│   ├── auth.js                   # /auth (login, register)
+│   ├── user.js                   # /me (user info, update)
+│   ├── task.js                   # /task (CRUD operations)
+│   ├── admin.js                  # / (employee management)
+│   ├── stats.js                  # /stats (analytics)
+│   ├── report.js                 # /reports (report generation)
+│   └── notification.js           # /notifications
+├── middleware/                   # Express middleware (3 files)
+│   ├── authMiddleware.js         # JWT verification
+│   ├── uploadMiddleware.js       # File upload (documents)
+│   └── uploadAvatarMiddleware.js # Avatar upload
+├── uploads/                      # Uploaded files storage
+│   ├── documents/
+│   └── avatars/
+├── utils/                        # Utility functions
+├── .env                          # Environment variables
+└── package.json</code></pre></div><div style="display:contents" dir="auto"><h2 id="fbb27529-1b83-45f4-942e-283e03c77a4f" class="">API Endpoints</h2></div><div style="display:contents" dir="auto"><h3 id="c8309236-f005-4fab-82a4-dc822d891895" class="">Authentication Routes (<code>/auth</code>)</h3></div><div style="display:contents" dir="auto"><p id="072ee3de-926a-4cc1-8cae-5c83420f23d7" class=""><strong>POST /auth/login</strong> - User login</p></div><div style="display:contents" dir="auto"><script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js" integrity="sha512-7Z9J3l1+EYfeaPKcGXu3MS/7T+w19WtKQY/n+xzmw4hZhJ9tyYmcUS+4QqAlzhicE5LAfMQSF3iFTK9bQdTxXg==" crossorigin="anonymous" referrerPolicy="no-referrer"></script><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism.min.css" integrity="sha512-tN7Ec6zAFaVSG3TpNAKtk4DOHNpSwKHxxrsiw4GHKESGPs5njn/0sMCUMl2svV4wo4BK/rCP7juYz+zx+l6oeQ==" crossorigin="anonymous" referrerPolicy="no-referrer"/><pre id="b9fcbd72-0fd0-42da-9fc8-691de096b632" class="code code-wrap"><code class="language-JavaScript" style="white-space:pre-wrap;word-break:break-all">Body: {email, password}
+Response: {token, message}</code></pre></div><div style="display:contents" dir="auto"><p id="583353b9-a237-47f0-98c3-bde79402f677" class=""><strong>POST /auth/register</strong> - Company &amp; admin registration</p></div><div style="display:contents" dir="auto"><script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js" integrity="sha512-7Z9J3l1+EYfeaPKcGXu3MS/7T+w19WtKQY/n+xzmw4hZhJ9tyYmcUS+4QqAlzhicE5LAfMQSF3iFTK9bQdTxXg==" crossorigin="anonymous" referrerPolicy="no-referrer"></script><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism.min.css" integrity="sha512-tN7Ec6zAFaVSG3TpNAKtk4DOHNpSwKHxxrsiw4GHKESGPs5njn/0sMCUMl2svV4wo4BK/rCP7juYz+zx+l6oeQ==" crossorigin="anonymous" referrerPolicy="no-referrer"/><pre id="a9e848bc-8f18-430a-995d-c7044bc2192b" class="code code-wrap"><code class="language-JavaScript" style="white-space:pre-wrap;word-break:break-all">Body: {
+  email, password, firstName, lastName,
+  companyEmail, companyName, companyContactNumber,
+  companyAddress (REQUIRED),
+  companyGSTNumber (OPTIONAL),
+  companyPANNumber (OPTIONAL)
+}
+Response: {userId, companyId, subscriptionId, message}</code></pre></div><div style="display:contents" dir="auto"><h3 id="97febcc9-6b9a-46ec-8372-57906b770598" class="">User Routes (<code>/me</code> - Protected)</h3></div><div style="display:contents" dir="auto"><ul id="26c49de0-82c1-4d10-9623-553df9f7cfcb" class="bulleted-list"><li style="list-style-type:disc"><strong>GET /me/userinfo</strong> - Get current user info</li></ul></div><div style="display:contents" dir="auto"><ul id="a8acc7ae-4a6f-4e95-8ae0-b2971414ac2a" class="bulleted-list"><li style="list-style-type:disc"><strong>PATCH /me/update-user/:id</strong> - Update user profile</li></ul></div><div style="display:contents" dir="auto"><ul id="07009257-328a-456a-adf0-0224476cad61" class="bulleted-list"><li style="list-style-type:disc"><strong>DELETE /me/delete-user/:id</strong> - Delete user account</li></ul></div><div style="display:contents" dir="auto"><ul id="099f0f3e-3756-449c-bd56-35e8b4e4944d" class="bulleted-list"><li style="list-style-type:disc"><strong>GET /me/usersList</strong> - Get all users in company</li></ul></div><div style="display:contents" dir="auto"><ul id="b9c1612a-0c60-4bc8-9ff2-646a72204aeb" class="bulleted-list"><li style="list-style-type:disc"><strong>POST /me/save-token</strong> - Save Expo push token</li></ul></div><div style="display:contents" dir="auto"><ul id="e8919dfd-f755-449e-91ad-342446e430c8" class="bulleted-list"><li style="list-style-type:disc"><strong>DELETE /me/remove-token</strong> - Remove push token</li></ul></div><div style="display:contents" dir="auto"><ul id="c2b6102a-9c4f-46f8-9114-7acf48d32629" class="bulleted-list"><li style="list-style-type:disc"><strong>PATCH /me/reset-password/:id</strong> - Reset user password</li></ul></div><div style="display:contents" dir="auto"><h3 id="f0d68f63-b032-439c-81d0-3796a755bbba" class="">Task Routes (<code>/task</code> - Protected)</h3></div><div style="display:contents" dir="auto"><ul id="cc723624-c210-4d0d-b048-b44ccecf0516" class="bulleted-list"><li style="list-style-type:disc"><strong>POST /task/add-task</strong> - Create new task</li></ul></div><div style="display:contents" dir="auto"><ul id="b805f966-a524-4ba3-93f4-f9656c05ec3b" class="bulleted-list"><li style="list-style-type:disc"><strong>POST /task/add-sub-task</strong> - Create subtask</li></ul></div><div style="display:contents" dir="auto"><ul id="a8e4da9c-6932-48f8-8ce9-5074d30dc707" class="bulleted-list"><li style="list-style-type:disc"><strong>GET /task/getTaskList</strong> - Get filtered task list</li></ul></div><div style="display:contents" dir="auto"><ul id="c9becf11-f207-4e7d-8e1d-bdacc3b702b2" class="bulleted-list"><li style="list-style-type:disc"><strong>GET /task/:id</strong> - Get single task details</li></ul></div><div style="display:contents" dir="auto"><ul id="73a1dea0-3a93-41a9-9d28-2e5fcba61393" class="bulleted-list"><li style="list-style-type:disc"><strong>PATCH /task/edit/:id</strong> - Update task</li></ul></div><div style="display:contents" dir="auto"><ul id="e51891eb-ed20-4f86-9ff4-fd6902de507c" class="bulleted-list"><li style="list-style-type:disc"><strong>DELETE /task/delete-task/:id</strong> - Delete task</li></ul></div><div style="display:contents" dir="auto"><ul id="581737c1-f221-49f0-a062-5c81482ecb75" class="bulleted-list"><li style="list-style-type:disc"><strong>PATCH /task/markAsCompleted</strong> - Mark task completed</li></ul></div><div style="display:contents" dir="auto"><ul id="28dcb7e5-76a2-4b60-9687-ccecff8de9b6" class="bulleted-list"><li style="list-style-type:disc"><strong>DELETE /task/:id/documents/:docId</strong> - Delete task document</li></ul></div><div style="display:contents" dir="auto"><ul id="2f78abf1-a03d-43bc-bd27-39861652b675" class="bulleted-list"><li style="list-style-type:disc"><strong>GET /task/search</strong> - Search tasks</li></ul></div><div style="display:contents" dir="auto"><h3 id="8b0658c2-a1b1-417f-90cb-1340b6afee9d" class="">Admin Routes (<code>/</code> - Protected)</h3></div><div style="display:contents" dir="auto"><ul id="ea630705-472d-4127-9ee9-2dba81e8ba3b" class="bulleted-list"><li style="list-style-type:disc"><strong>GET /emp-list</strong> - Get employees list</li></ul></div><div style="display:contents" dir="auto"><ul id="145a56a2-f762-4217-b151-f20d97a3c5de" class="bulleted-list"><li style="list-style-type:disc"><strong>POST /assign-employee/:id</strong> - Assign employee to supervisor</li></ul></div><div style="display:contents" dir="auto"><ul id="d0c32887-6137-4dc9-9b32-ef8fd4e5e54d" class="bulleted-list"><li style="list-style-type:disc"><strong>POST /unassign-employee/:id</strong> - Unassign employee</li></ul></div><div style="display:contents" dir="auto"><ul id="786a91b3-8802-4929-9056-47d97c1afa41" class="bulleted-list"><li style="list-style-type:disc"><strong>POST /add-employee</strong> - Add new employee</li></ul></div><div style="display:contents" dir="auto"><ul id="5f246dd1-a1a1-4b3c-928e-b890bc727568" class="bulleted-list"><li style="list-style-type:disc"><strong>GET /get-employee-tasks</strong> - Get tasks for employees</li></ul></div><div style="display:contents" dir="auto"><h3 id="98a76253-105d-4334-bfff-ad7706273af6" class="">Stats Routes (<code>/stats</code> - Protected)</h3></div><div style="display:contents" dir="auto"><ul id="43e0ac11-eaa9-4d09-b438-e13cde15b834" class="bulleted-list"><li style="list-style-type:disc"><strong>GET /stats/tasks-summary</strong> - Get task statistics summary</li></ul></div><div style="display:contents" dir="auto"><ul id="31ae5469-86c3-49bf-87d6-039aad271b83" class="bulleted-list"><li style="list-style-type:disc"><strong>GET /stats/todaysTasks</strong> - Get today&#x27;s tasks</li></ul></div><div style="display:contents" dir="auto"><ul id="0ab7451b-d494-46f1-8c99-d612d7241ddc" class="bulleted-list"><li style="list-style-type:disc"><strong>GET /stats/statisticsGraph</strong> - Get data for charts</li></ul></div><div style="display:contents" dir="auto"><h3 id="abc683d5-aedb-44ba-a582-8fea57fa66d1" class="">Reports Routes (<code>/reports</code> - Protected)</h3></div><div style="display:contents" dir="auto"><ul id="cb1b695f-8c41-4f37-aa6d-8c86db5654fd" class="bulleted-list"><li style="list-style-type:disc"><strong>GET /reports/admin-report-summary</strong> - Admin report summary</li></ul></div><div style="display:contents" dir="auto"><ul id="d9624600-bb89-4f05-b0f6-bb15d9d6775e" class="bulleted-list"><li style="list-style-type:disc"><strong>GET /reports/self-report-summary</strong> - Employee self-report</li></ul></div><div style="display:contents" dir="auto"><h3 id="6488789a-2423-41d0-8869-bc5ab14320df" class="">Notification Routes (<code>/notifications</code> - Protected)</h3></div><div style="display:contents" dir="auto"><ul id="914ae762-3d5d-4782-aa85-cef36151e3ee" class="bulleted-list"><li style="list-style-type:disc"><strong>GET /notifications/getAllNotifications</strong> - Get all notifications</li></ul></div><div style="display:contents" dir="auto"><ul id="7e985c03-0e07-4f53-8514-40df7372eee1" class="bulleted-list"><li style="list-style-type:disc"><strong>GET /notifications/unreadCount</strong> - Get unread count</li></ul></div><div style="display:contents" dir="auto"><ul id="9cf29590-26e6-42d5-b849-4a2edbf1ca1c" class="bulleted-list"><li style="list-style-type:disc"><strong>PATCH /notifications/handleTaskApproval/:id</strong> - Approve/reject task</li></ul></div><div style="display:contents" dir="auto"><h2 id="28bc69b6-c1ae-4b91-85bc-9b8fd833bfd5" class="">Middleware</h2></div><div style="display:contents" dir="auto"><h3 id="2bd6ab89-45ef-4f53-8886-571fd7095878" class="">authMiddleware.js</h3></div><div style="display:contents" dir="auto"><script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js" integrity="sha512-7Z9J3l1+EYfeaPKcGXu3MS/7T+w19WtKQY/n+xzmw4hZhJ9tyYmcUS+4QqAlzhicE5LAfMQSF3iFTK9bQdTxXg==" crossorigin="anonymous" referrerPolicy="no-referrer"></script><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism.min.css" integrity="sha512-tN7Ec6zAFaVSG3TpNAKtk4DOHNpSwKHxxrsiw4GHKESGPs5njn/0sMCUMl2svV4wo4BK/rCP7juYz+zx+l6oeQ==" crossorigin="anonymous" referrerPolicy="no-referrer"/><pre id="42a186d3-9b71-4c8b-9e4c-e90327f7ac52" class="code code-wrap"><code class="language-JavaScript" style="white-space:pre-wrap;word-break:break-all">// JWT token verification
+// Extracts token from Authorization: Bearer &lt;token&gt;
+// Verifies token and attaches decoded user to req.user
+// Used on all routes except /auth/*</code></pre></div><div style="display:contents" dir="auto"><h3 id="fdfc65e0-a346-439c-9abe-01a78cf2e50c" class="">uploadMiddleware.js</h3></div><div style="display:contents" dir="auto"><script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js" integrity="sha512-7Z9J3l1+EYfeaPKcGXu3MS/7T+w19WtKQY/n+xzmw4hZhJ9tyYmcUS+4QqAlzhicE5LAfMQSF3iFTK9bQdTxXg==" crossorigin="anonymous" referrerPolicy="no-referrer"></script><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism.min.css" integrity="sha512-tN7Ec6zAFaVSG3TpNAKtk4DOHNpSwKHxxrsiw4GHKESGPs5njn/0sMCUMl2svV4wo4BK/rCP7juYz+zx+l6oeQ==" crossorigin="anonymous" referrerPolicy="no-referrer"/><pre id="4fdde7d3-6cc1-4492-bc2c-43d26ee2f3d1" class="code code-wrap"><code class="language-JavaScript" style="white-space:pre-wrap;word-break:break-all">// Multer configuration for document uploads
+// Accepts: .png, .jpg, .jpeg, .pdf, .doc, .docx, .txt
+// Max 3 files per request
+// Stores in ./uploads/documents/</code></pre></div><div style="display:contents" dir="auto"><h3 id="0a56191a-3fc7-4528-be0c-f1ac216f81c6" class="">uploadAvatarMiddleware.js</h3></div><div style="display:contents" dir="auto"><script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js" integrity="sha512-7Z9J3l1+EYfeaPKcGXu3MS/7T+w19WtKQY/n+xzmw4hZhJ9tyYmcUS+4QqAlzhicE5LAfMQSF3iFTK9bQdTxXg==" crossorigin="anonymous" referrerPolicy="no-referrer"></script><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism.min.css" integrity="sha512-tN7Ec6zAFaVSG3TpNAKtk4DOHNpSwKHxxrsiw4GHKESGPs5njn/0sMCUMl2svV4wo4BK/rCP7juYz+zx+l6oeQ==" crossorigin="anonymous" referrerPolicy="no-referrer"/><pre id="f83cb83a-37d2-4625-a34c-0bed934a75e2" class="code code-wrap"><code class="language-JavaScript" style="white-space:pre-wrap;word-break:break-all">// Multer configuration for avatar uploads
+// Accepts: .png, .jpg, .jpeg
+// Single file upload
+// Stores in ./uploads/avatars/</code></pre></div><div style="display:contents" dir="auto"><h2 id="406a59ae-d1f6-4348-8736-3108b25f97ab" class="">Controllers Architecture</h2></div><div style="display:contents" dir="auto"><ul id="dae090a2-051c-4cc3-82bd-01658dad59d4" class="bulleted-list"><li style="list-style-type:disc"><strong>Separation of Concerns</strong>: Routes handle HTTP, controllers handle business logic</li></ul></div><div style="display:contents" dir="auto"><ul id="f1331bae-b866-4d04-8cf8-1d79027e4ef5" class="bulleted-list"><li style="list-style-type:disc"><strong>Error Handling</strong>: Try-catch blocks with appropriate HTTP status codes</li></ul></div><div style="display:contents" dir="auto"><ul id="d8fe677c-7856-464d-8605-7b804b3ce6aa" class="bulleted-list"><li style="list-style-type:disc"><strong>Validation</strong>: Input validation before database operations</li></ul></div><div style="display:contents" dir="auto"><ul id="12cf48b3-c059-4941-b753-53d5488c7fc3" class="bulleted-list"><li style="list-style-type:disc"><strong>Population</strong>: Mongoose <code>.populate()</code> for related documents</li></ul></div><div style="display:contents" dir="auto"><h3 id="ecf6a3af-8699-4c54-a708-3b03f5b4fdc5" class="">Example: taskController.js Key Functions</h3></div><div style="display:contents" dir="auto"><script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js" integrity="sha512-7Z9J3l1+EYfeaPKcGXu3MS/7T+w19WtKQY/n+xzmw4hZhJ9tyYmcUS+4QqAlzhicE5LAfMQSF3iFTK9bQdTxXg==" crossorigin="anonymous" referrerPolicy="no-referrer"></script><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism.min.css" integrity="sha512-tN7Ec6zAFaVSG3TpNAKtk4DOHNpSwKHxxrsiw4GHKESGPs5njn/0sMCUMl2svV4wo4BK/rCP7juYz+zx+l6oeQ==" crossorigin="anonymous" referrerPolicy="no-referrer"/><pre id="153d1a8c-5c6b-449b-8490-fc249389db45" class="code code-wrap"><code class="language-JavaScript" style="white-space:pre-wrap;word-break:break-all">createTask()       // Create task with notifications
+getTask()          // Fetch single task with populated fields
+getTaskList()      // Get filtered, paginated task list
+editTask()         // Update task and handle status changes
+deleteTask()       // Soft/hard delete task
+markAsCompleted()  // Mark task completed, notify observers
+createSubTask()    // Create subtask linked to parent
+deleteDocument()   // Remove document from task
+searchTasks()      // Full-text search across tasks</code></pre></div><div style="display:contents" dir="auto"><h2 id="ce321915-3c8d-4dc2-ba2e-9b673a42a81f" class="">External Services</h2></div><div style="display:contents" dir="auto"><h3 id="6e93ad0a-24d4-4934-ae5d-1dc164defbc7" class="">Expo Push Notifications</h3></div><div style="display:contents" dir="auto"><script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js" integrity="sha512-7Z9J3l1+EYfeaPKcGXu3MS/7T+w19WtKQY/n+xzmw4hZhJ9tyYmcUS+4QqAlzhicE5LAfMQSF3iFTK9bQdTxXg==" crossorigin="anonymous" referrerPolicy="no-referrer"></script><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism.min.css" integrity="sha512-tN7Ec6zAFaVSG3TpNAKtk4DOHNpSwKHxxrsiw4GHKESGPs5njn/0sMCUMl2svV4wo4BK/rCP7juYz+zx+l6oeQ==" crossorigin="anonymous" referrerPolicy="no-referrer"/><pre id="49829813-abda-4f09-ac45-d076a8aacd9e" class="code code-wrap"><code class="language-JavaScript" style="white-space:pre-wrap;word-break:break-all">// Used in notificationController.js
+// Sends bulk push notifications to mobile devices
+// Uses Expo&#x27;s push notification service
+// Requires expoPushToken stored in user document</code></pre></div><div style="display:contents" dir="auto"><h3 id="c9c4f359-0a32-4170-8477-09429bf0fc92" class=""><a href="http://Socket.io">Socket.io</a> Events</h3></div><div style="display:contents" dir="auto"><script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js" integrity="sha512-7Z9J3l1+EYfeaPKcGXu3MS/7T+w19WtKQY/n+xzmw4hZhJ9tyYmcUS+4QqAlzhicE5LAfMQSF3iFTK9bQdTxXg==" crossorigin="anonymous" referrerPolicy="no-referrer"></script><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism.min.css" integrity="sha512-tN7Ec6zAFaVSG3TpNAKtk4DOHNpSwKHxxrsiw4GHKESGPs5njn/0sMCUMl2svV4wo4BK/rCP7juYz+zx+l6oeQ==" crossorigin="anonymous" referrerPolicy="no-referrer"/><pre id="24a733a7-c584-4249-be11-2c1ace6591b7" class="code code-wrap"><code class="language-JavaScript" style="white-space:pre-wrap;word-break:break-all">// Real-time events
+io.to(socketId).emit(&quot;newNotification&quot;, data)
+io.to(socketId).emit(&quot;taskUpdated&quot;, task)
+// Managed via global.io and global.connectedUsers</code></pre></div><div style="display:contents" dir="auto"><h2 id="d1ed4ceb-f190-4d7c-a54d-ac6ea0845d7b" class="">Cron Jobs</h2></div><div style="display:contents" dir="auto"><h3 id="5ea0f662-c495-4ffe-8676-d44e183dfed3" class="">Every Minute - Overdue Task Detection</h3></div><div style="display:contents" dir="auto"><script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js" integrity="sha512-7Z9J3l1+EYfeaPKcGXu3MS/7T+w19WtKQY/n+xzmw4hZhJ9tyYmcUS+4QqAlzhicE5LAfMQSF3iFTK9bQdTxXg==" crossorigin="anonymous" referrerPolicy="no-referrer"></script><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism.min.css" integrity="sha512-tN7Ec6zAFaVSG3TpNAKtk4DOHNpSwKHxxrsiw4GHKESGPs5njn/0sMCUMl2svV4wo4BK/rCP7juYz+zx+l6oeQ==" crossorigin="anonymous" referrerPolicy="no-referrer"/><pre id="776d0024-9b12-4b39-ba10-b42206302ac3" class="code code-wrap"><code class="language-JavaScript" style="white-space:pre-wrap;word-break:break-all">// Marks tasks as overdue and creates notifications
+cron.schedule(&quot;* * * * *&quot;, async () =&gt; {
+  // Find tasks past due date but not completed/overdue
+  // Update status to &quot;Overdue&quot;
+  // Create &quot;Overdue&quot; notifications for assignees and observers
+});</code></pre></div><div style="display:contents" dir="auto"><h3 id="2e54e118-bdec-47d9-863a-d9f23733a23b" class="">Every Minute - Reminder Notifications</h3></div><div style="display:contents" dir="auto"><script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js" integrity="sha512-7Z9J3l1+EYfeaPKcGXu3MS/7T+w19WtKQY/n+xzmw4hZhJ9tyYmcUS+4QqAlzhicE5LAfMQSF3iFTK9bQdTxXg==" crossorigin="anonymous" referrerPolicy="no-referrer"></script><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism.min.css" integrity="sha512-tN7Ec6zAFaVSG3TpNAKtk4DOHNpSwKHxxrsiw4GHKESGPs5njn/0sMCUMl2svV4wo4BK/rCP7juYz+zx+l6oeQ==" crossorigin="anonymous" referrerPolicy="no-referrer"/><pre id="baaaa569-ec7f-45b3-a0bf-592a23367a4f" class="code code-wrap"><code class="language-JavaScript" style="white-space:pre-wrap;word-break:break-all">// Sends scheduled reminder notifications
+cron.schedule(&quot;* * * * *&quot;, async () =&gt; {
+  // Find tasks with reminders due
+  // Create &quot;reminder&quot; notifications
+  // Calculate remaining time dynamically
+  // Send push notifications in bulk
+});</code></pre></div><div style="display:contents" dir="auto"><h3 id="5996ec6b-df1a-4edd-82a0-923cf2744927" class="">Daily at Midnight - Recurring Tasks Reset</h3></div><div style="display:contents" dir="auto"><script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js" integrity="sha512-7Z9J3l1+EYfeaPKcGXu3MS/7T+w19WtKQY/n+xzmw4hZhJ9tyYmcUS+4QqAlzhicE5LAfMQSF3iFTK9bQdTxXg==" crossorigin="anonymous" referrerPolicy="no-referrer"></script><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism.min.css" integrity="sha512-tN7Ec6zAFaVSG3TpNAKtk4DOHNpSwKHxxrsiw4GHKESGPs5njn/0sMCUMl2svV4wo4BK/rCP7juYz+zx+l6oeQ==" crossorigin="anonymous" referrerPolicy="no-referrer"/><pre id="e3641b1f-61b2-4e28-bf29-7322e338b863" class="code code-wrap"><code class="language-JavaScript" style="white-space:pre-wrap;word-break:break-all">// Resets completed recurring tasks for next cycle
+cron.schedule(&quot;0 0 * * *&quot;, async () =&gt; {
+  // Find completed recurring tasks
+  // Calculate next due date based on schedule
+  // Reset status to &quot;Pending&quot;
+  // Adjust notification times
+  // Delete expired notifications
+});</code></pre></div><div style="display:contents" dir="auto"><h2 id="90d6c911-8d4d-45a2-a32a-092b6436acf4" class="">Development Setup</h2></div><div style="display:contents" dir="auto"><script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js" integrity="sha512-7Z9J3l1+EYfeaPKcGXu3MS/7T+w19WtKQY/n+xzmw4hZhJ9tyYmcUS+4QqAlzhicE5LAfMQSF3iFTK9bQdTxXg==" crossorigin="anonymous" referrerPolicy="no-referrer"></script><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism.min.css" integrity="sha512-tN7Ec6zAFaVSG3TpNAKtk4DOHNpSwKHxxrsiw4GHKESGPs5njn/0sMCUMl2svV4wo4BK/rCP7juYz+zx+l6oeQ==" crossorigin="anonymous" referrerPolicy="no-referrer"/><pre id="d68b1c84-faa0-4ee4-9a91-e19a052067b4" class="code code-wrap"><code class="language-Bash" style="white-space:pre-wrap;word-break:break-all"># Navigate to backend directory
+cd foratask-backend
+
+# Install dependencies
+npm install
+
+# Configure environment variables
+# Create .env file with:
+JWT_SECRET=jwt-token-foratask
+PORT=3000
+MONGO_URI=mongodb://127.0.0.1:27017/foratask
+NODE_ENV=production
+UPLOAD_PATH=./uploads/documents
+
+# Start MongoDB
+mongod
+
+# Run development server
+npm run dev
+
+# Run production server
+npm start</code></pre></div></div></article><span class="sans" style="font-size:14px;padding-top:2em"></span></body></html>

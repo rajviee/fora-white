@@ -9,9 +9,15 @@ const adminRoute = require('./routes/admin');
 const notificationRoute = require('./routes/notification');
 const statsRoute = require('./routes/stats');
 const reportRoute = require('./routes/report');
-const { sendBulkPushNotifications } = require('./controllers/notificationController')
+const paymentRoute = require('./routes/payment');
+const masterAdminRoute = require('./routes/masterAdmin');
+const { sendBulkPushNotifications } = require('./controllers/notificationController');
+const { seedMasterAdmin } = require('./controllers/masterAdminController');
 const Task = require('./models/task');
 const User = require('./models/user');
+const Subscription = require('./models/subscription');
+const Company = require('./models/company');
+const TaskCompletionHistory = require('./models/taskCompletionHistory');
 const cron = require("node-cron");
 const cors = require('cors');
 const app = express();
@@ -38,6 +44,7 @@ app.use(express.urlencoded({ extended: true }));
 const PORT = process.env.PORT || 3000;
 const MONGO_URI = process.env.MONGO_URI;
 
+// Routes
 app.use('/auth', authRoute);
 app.use('/me', authMiddleware, userRoute);
 app.use('/task', authMiddleware, taskRoute);
@@ -45,6 +52,8 @@ app.use('/uploads', express.static('uploads'));
 app.use('/stats', authMiddleware, statsRoute);
 app.use('/notifications/', authMiddleware, notificationRoute);
 app.use('/reports', authMiddleware, reportRoute);
+app.use('/payment', paymentRoute);
+app.use('/master-admin', masterAdminRoute);
 app.use('/', authMiddleware, adminRoute);
 
 const connectedUsers = {};

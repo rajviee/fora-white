@@ -60,6 +60,25 @@ const taskSchema = mongoose.Schema({
         required: true,
         default: false
     },
+    // NEW: Remote task flag
+    isRemote: {
+        type: Boolean,
+        default: false
+    },
+    // NEW: Multi-location support
+    isMultiLocation: {
+        type: Boolean,
+        default: false
+    },
+    locations: [{
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'TaskLocation'
+    }],
+    // Current active location for tracking
+    currentLocationIndex: {
+        type: Number,
+        default: 0
+    },
     recurringSchedule: {
         type: String,
         enum: ["Daily", "Weekly", "Monthly", "3-Months"],

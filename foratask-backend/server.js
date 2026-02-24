@@ -11,6 +11,14 @@ const statsRoute = require('./routes/stats');
 const reportRoute = require('./routes/report');
 const paymentRoute = require('./routes/payment');
 const masterAdminRoute = require('./routes/masterAdmin');
+// New routes
+const chatRoute = require('./routes/chat');
+const attendanceRoute = require('./routes/attendance');
+const organizationSettingsRoute = require('./routes/organizationSettings');
+const salaryRoute = require('./routes/salary');
+const leaveRoute = require('./routes/leave');
+const taskExtendedRoute = require('./routes/taskExtended');
+
 const { sendBulkPushNotifications } = require('./controllers/notificationController');
 const { seedMasterAdmin } = require('./controllers/masterAdminController');
 const Task = require('./models/task');
@@ -18,6 +26,8 @@ const User = require('./models/user');
 const Subscription = require('./models/subscription');
 const Company = require('./models/company');
 const TaskCompletionHistory = require('./models/taskCompletionHistory');
+const ChatRoom = require('./models/chatRoom');
+const ChatMessage = require('./models/chatMessage');
 const cron = require("node-cron");
 const cors = require('cors');
 const app = express();
@@ -48,15 +58,26 @@ const MONGO_URI = process.env.MONGO_URI;
 app.use('/auth', authRoute);
 app.use('/me', authMiddleware, userRoute);
 app.use('/task', authMiddleware, taskRoute);
+app.use('/task-extended', authMiddleware, taskExtendedRoute);
 app.use('/uploads', express.static('uploads'));
 app.use('/stats', authMiddleware, statsRoute);
 app.use('/notifications/', authMiddleware, notificationRoute);
 app.use('/reports', authMiddleware, reportRoute);
 app.use('/payment', paymentRoute);
 app.use('/master-admin', masterAdminRoute);
+// New module routes
+app.use('/chat', chatRoute);
+app.use('/attendance', attendanceRoute);
+app.use('/organization-settings', organizationSettingsRoute);
+app.use('/salary', salaryRoute);
+app.use('/leave', leaveRoute);
 app.use('/', authMiddleware, adminRoute);
 
-const connectedUsers = {};
+// Global references for socket.io
+global.io = io;
+global.connectedUsers = {};
+
+const connectedUsers = global.connectedUsers;
 io.on("connection", (socket) => {
   console.log("Socket connected:", socket.id);
 

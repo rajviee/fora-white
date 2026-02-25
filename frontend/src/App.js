@@ -10,7 +10,10 @@ import TaskCreate from './pages/TaskCreate';
 import TaskDetail from './pages/TaskDetail';
 import Chat from './pages/Chat';
 import Attendance from './pages/Attendance';
-import Team from './pages/Team';
+import Employees from './pages/Employees';
+import EmployeeProfile from './pages/EmployeeProfile';
+import Reports from './pages/Reports';
+import Settings from './pages/Settings';
 
 function PrivateRoute({ children }) {
   const { user, loading } = useAuth();
@@ -39,7 +42,10 @@ export default function App() {
             <Route path="tasks/:id" element={<TaskDetail />} />
             <Route path="chat" element={<Chat />} />
             <Route path="attendance" element={<Attendance />} />
-            <Route path="team" element={<Team />} />
+            <Route path="employees" element={<Employees />} />
+            <Route path="employees/:id" element={<EmployeeProfile />} />
+            <Route path="reports" element={<Reports />} />
+            <Route path="settings" element={<Settings />} />
           </Route>
         </Routes>
       </BrowserRouter>

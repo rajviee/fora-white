@@ -63,3 +63,7 @@ async def proxy(path: str, request: Request):
 @app.get("/api")
 async def api_root():
     return {"status": "ok", "message": "ForaTask API proxy running"}
+
+@app.get("/health")
+async def health():
+    return {"status": "ok"}

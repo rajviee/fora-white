@@ -92,18 +92,21 @@ async function seed() {
       endTime: '18:00',
       totalHours: 9,
     },
-    workingDays: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'],
+    workingDays: {
+      monday: true, tuesday: true, wednesday: true, thursday: true, friday: true, saturday: true, sunday: false,
+    },
     attendance: {
       lateToleranceMinutes: 15,
       earlyLeaveToleranceMinutes: 15,
-      autoMarkAbsent: true,
-      geofenceRadius: 300,
+      requireGeotag: true,
+      allowRemoteAttendance: true,
     },
     officeLocations: [{
       name: 'Main Office',
       address: 'Ahmedabad, India',
       coordinates: { latitude: 23.0225, longitude: 72.5714 },
-      radius: 300,
+      geofenceRadius: 300,
+      isPrimary: true,
     }],
   });
   console.log('Organization settings created');

@@ -21,7 +21,7 @@ export default function TaskList() {
       const params = { isSelfTask: isSelf, perPage: 15, page };
       if (statusFilter) params.status = statusFilter;
       if (search) params.search = search;
-      const res = await api.get('/task/list', { params });
+      const res = await api.get('/task/getTaskList', { params });
       setTasks(res.data.tasks || []);
       setTotal(res.data.totalTasks || 0);
     } catch (e) {

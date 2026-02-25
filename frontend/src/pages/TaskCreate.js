@@ -18,7 +18,7 @@ export default function TaskCreate() {
   const [locationCount, setLocationCount] = useState(0);
 
   useEffect(() => {
-    api.get('/me/users').then(r => setUsers(r.data?.users || r.data || [])).catch(() => {});
+    api.get('/me/usersList').then(r => setUsers(r.data?.users || r.data || [])).catch(() => {});
   }, []);
 
   const set = (k) => (e) => setForm({ ...form, [k]: e.target.value });
@@ -79,7 +79,7 @@ export default function TaskCreate() {
       };
       if (form.taskType === 'Recurring') payload.recurringSchedule = form.recurringSchedule;
 
-      const res = await api.post('/task/create', payload);
+      const res = await api.post('/task/add-task', payload);
 
       // Create locations if multi-location
       if (form.isMultiLocation && locations.length > 0) {

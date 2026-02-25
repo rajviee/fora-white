@@ -17,10 +17,16 @@ export default function Dashboard() {
   const loadData = async () => {
     try {
       const [statsRes, tasksRes] = await Promise.all([
-        api.get('/stats/dashboard').catch(() => ({ data: null })),
-        api.get('/task/list?isSelfTask=false&perPage=5&page=0').catch(() => ({ data: { tasks: [] } })),
+        api.get('/stats/tasks-summary?isSelfTask=false').catch(() => ({ data: null })),
+        api.get('/task/getTaskList?isSelfTask=false&perPage=5&page=0').catch(() => ({ data: { tasks: [] } })),
       ]);
-      setStats(statsRes.data);
+      const s = statsRes.data;
+      setStats({
+        totalTasks: s?.allTimeTotalTasks || 0,
+        inProgress: (s?.allTimeTotalTasks || 0) - (s?.allTimeCompletedTasks || 0) - (s?.allTimeOverdueTasks || 0),
+        completed: s?.allTimeCompletedTasks || 0,
+        overdue: s?.allTimeOverdueTasks || 0,
+      });
       setRecentTasks(tasksRes.data?.tasks || []);
     } catch (e) {
       console.error(e);

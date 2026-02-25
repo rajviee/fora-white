@@ -353,11 +353,41 @@ const approveAllLocations = async (req, res) => {
     }
 };
 
+// Add locations via API route
+const addLocations = async (req, res) => {
+    try {
+        const { taskId } = req.params;
+        const { locations } = req.body;
+        const userId = req.user.id;
+        const companyId = req.user.company;
+
+        const task = await Task.findOne({ _id: taskId, company: companyId });
+        if (!task) {
+            return res.status(404).json({ message: 'Task not found' });
+        }
+
+        if (!locations || !Array.isArray(locations) || locations.length === 0) {
+            return res.status(400).json({ message: 'Locations array is required' });
+        }
+
+        const created = await createTaskLocations(taskId, companyId, locations, userId);
+        
+        // Mark task as multi-location
+        await Task.findByIdAndUpdate(taskId, { isMultiLocation: true });
+
+        res.status(201).json({ success: true, locations: created });
+    } catch (error) {
+        console.error('Add locations error:', error);
+        res.status(500).json({ message: error.message });
+    }
+};
+
 module.exports = {
     createTaskLocations,
     getTaskLocations,
     updateLocationProgress,
     markAttendanceAtLocation,
     approveLocation,
-    approveAllLocations
+    approveAllLocations,
+    addLocations
 };

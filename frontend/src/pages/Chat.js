@@ -14,6 +14,7 @@ export default function Chat() {
   const [newMessage, setNewMessage] = useState('');
   const [users, setUsers] = useState([]);
   const [showNewChat, setShowNewChat] = useState(false);
+  const [showSidebar, setShowSidebar] = useState(true);
   const [loading, setLoading] = useState(true);
   const socketRef = useRef(null);
   const messagesEndRef = useRef(null);
@@ -21,47 +22,34 @@ export default function Chat() {
   useEffect(() => {
     loadRooms();
     loadUsers();
-    // Socket connection
     socketRef.current = io(SOCKET_URL, { path: '/api/socket.io', transports: ['polling'] });
-    socketRef.current.on('connect', () => {
-      socketRef.current.emit('registerUser', user?.id);
-    });
+    socketRef.current.on('connect', () => { socketRef.current.emit('registerUser', user?.id); });
     socketRef.current.on('newMessage', (data) => {
-      if (data.roomId === activeRoom?._id) {
-        setMessages(prev => [...prev, data.message]);
-      }
+      if (data.roomId === activeRoom?._id) setMessages(prev => [...prev, data.message]);
       loadRooms();
     });
     return () => { socketRef.current?.disconnect(); };
   }, []);
 
-  useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-  }, [messages]);
+  useEffect(() => { messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' }); }, [messages]);
 
   const loadRooms = async () => {
-    try {
-      const res = await api.get('/chat/rooms');
-      setRooms(res.data?.rooms || []);
-    } catch (e) { console.error(e); }
+    try { const res = await api.get('/chat/rooms'); setRooms(res.data?.rooms || []); } catch (e) {}
     setLoading(false);
   };
-
   const loadUsers = async () => {
-    try {
-      const res = await api.get('/me/usersList');
-      setUsers(res.data?.users || res.data || []);
-    } catch (e) { console.error(e); }
+    try { const res = await api.get('/me/usersList'); setUsers(res.data || []); } catch (e) {}
   };
 
   const selectRoom = async (room) => {
     setActiveRoom(room);
+    setShowSidebar(false);
     try {
       const res = await api.get(`/chat/rooms/${room._id}/messages`);
       setMessages(res.data?.messages || []);
       socketRef.current?.emit('joinChatRoom', room._id);
       await api.post(`/chat/rooms/${room._id}/read`).catch(() => {});
-    } catch (e) { console.error(e); }
+    } catch (e) {}
   };
 
   const startDM = async (otherUserId) => {
@@ -70,19 +58,19 @@ export default function Chat() {
       setShowNewChat(false);
       await loadRooms();
       selectRoom(res.data?.room);
-    } catch (e) { console.error(e); }
+    } catch (e) {}
   };
 
   const sendMessage = async (e) => {
     e.preventDefault();
     if (!newMessage.trim() || !activeRoom) return;
     try {
-      const res = await api.post('/chat/rooms/' + activeRoom._id + '/messages', { roomId: activeRoom._id, content: newMessage });
+      const res = await api.post(`/chat/rooms/${activeRoom._id}/messages`, { content: newMessage });
       setMessages(prev => [...prev, res.data?.message]);
       socketRef.current?.emit('sendChatMessage', { roomId: activeRoom._id, message: res.data?.message, userId: user?.id });
       setNewMessage('');
       loadRooms();
-    } catch (e) { console.error(e); }
+    } catch (e) {}
   };
 
   const getRoomName = (room) => {
@@ -94,11 +82,11 @@ export default function Chat() {
   return (
     <div className="animate-fade-in h-[calc(100vh-7.5rem)]" data-testid="chat-page">
       <div className="flex h-full bg-white rounded-xl border border-gray-100 overflow-hidden">
-        {/* Sidebar */}
-        <div className="w-72 border-r border-gray-100 flex flex-col shrink-0">
-          <div className="p-4 border-b border-gray-100">
+        {/* Room list sidebar */}
+        <div className={`${showSidebar ? 'flex' : 'hidden'} sm:flex w-full sm:w-72 border-r border-gray-100 flex-col shrink-0`}>
+          <div className="p-3 sm:p-4 border-b border-gray-100">
             <div className="flex items-center justify-between mb-2">
-              <h2 className="font-semibold text-secondary">Messages</h2>
+              <h2 className="font-semibold text-secondary text-sm sm:text-base">Discussion</h2>
               <button onClick={() => setShowNewChat(!showNewChat)} className="w-8 h-8 rounded-lg bg-primary/10 text-primary flex items-center justify-center hover:bg-primary/20 transition-colors" data-testid="new-chat-btn">
                 <i className="fa-solid fa-plus text-sm" />
               </button>
@@ -107,7 +95,7 @@ export default function Chat() {
 
           {showNewChat && (
             <div className="p-3 border-b border-gray-100 bg-gray-50">
-              <p className="text-xs font-medium text-gray-500 mb-2">Start a conversation</p>
+              <p className="text-xs font-medium text-gray-500 mb-2">Start conversation</p>
               <div className="space-y-1 max-h-40 overflow-auto">
                 {users.filter(u => u._id !== user?.id).map(u => (
                   <button key={u._id} onClick={() => startDM(u._id)} className="w-full text-left px-3 py-2 rounded-lg text-sm hover:bg-white transition-colors" data-testid={`dm-user-${u._id}`}>
@@ -119,46 +107,55 @@ export default function Chat() {
           )}
 
           <div className="flex-1 overflow-auto">
-            {loading ? (
-              <div className="flex justify-center py-8"><div className="animate-spin w-6 h-6 border-3 border-primary border-t-transparent rounded-full" /></div>
-            ) : rooms.length === 0 ? (
-              <p className="text-center text-gray-400 text-sm py-8">No conversations yet</p>
-            ) : (
-              rooms.map(room => (
-                <button
-                  key={room._id}
-                  onClick={() => selectRoom(room)}
-                  className={`w-full text-left px-4 py-3 border-b border-gray-50 hover:bg-gray-50 transition-colors ${activeRoom?._id === room._id ? 'bg-primary/5' : ''}`}
-                  data-testid={`room-${room._id}`}
-                >
-                  <p className="text-sm font-medium text-secondary truncate">{getRoomName(room)}</p>
-                  <p className="text-xs text-gray-400 truncate mt-0.5">{room.lastMessage?.content || 'No messages'}</p>
-                </button>
-              ))
-            )}
+            {rooms.length === 0 ? (
+              <p className="text-center text-gray-400 text-sm py-8">No conversations</p>
+            ) : rooms.map(room => (
+              <button
+                key={room._id}
+                onClick={() => selectRoom(room)}
+                className={`w-full text-left px-3 sm:px-4 py-3 border-b border-gray-50 hover:bg-gray-50 transition-colors ${activeRoom?._id === room._id ? 'bg-primary/5' : ''}`}
+                data-testid={`room-${room._id}`}
+              >
+                <div className="flex items-center gap-3">
+                  <div className="w-9 h-9 rounded-full bg-primary/10 flex items-center justify-center text-xs font-semibold text-primary shrink-0">
+                    {getRoomName(room)?.[0]}
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <p className="text-sm font-medium text-secondary truncate">{getRoomName(room)}</p>
+                    <p className="text-xs text-gray-400 truncate">{room.lastMessage?.content || 'No messages'}</p>
+                  </div>
+                </div>
+              </button>
+            ))}
           </div>
         </div>
 
         {/* Chat area */}
-        <div className="flex-1 flex flex-col">
+        <div className={`${!showSidebar || activeRoom ? 'flex' : 'hidden'} sm:flex flex-1 flex-col min-w-0`}>
           {!activeRoom ? (
             <div className="flex-1 flex items-center justify-center text-gray-400">
               <div className="text-center">
                 <i className="fa-solid fa-comments text-4xl mb-3" />
-                <p className="text-sm">Select a conversation to start chatting</p>
+                <p className="text-sm">Select a conversation</p>
               </div>
             </div>
           ) : (
             <>
-              <div className="h-14 px-5 border-b border-gray-100 flex items-center">
-                <h3 className="font-semibold text-secondary">{getRoomName(activeRoom)}</h3>
+              <div className="h-14 px-4 sm:px-5 border-b border-gray-100 flex items-center gap-3 shrink-0">
+                <button onClick={() => { setShowSidebar(true); setActiveRoom(null); }} className="sm:hidden text-gray-500">
+                  <i className="fa-solid fa-arrow-left" />
+                </button>
+                <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center text-xs font-semibold text-primary">
+                  {getRoomName(activeRoom)?.[0]}
+                </div>
+                <h3 className="font-semibold text-secondary text-sm">{getRoomName(activeRoom)}</h3>
               </div>
-              <div className="flex-1 overflow-auto p-5 space-y-3">
+              <div className="flex-1 overflow-auto p-3 sm:p-5 space-y-3">
                 {messages.map((msg, idx) => {
                   const isMine = (msg.sender?._id || msg.sender) === user?.id;
                   return (
                     <div key={idx} className={`flex ${isMine ? 'justify-end' : 'justify-start'}`}>
-                      <div className={`max-w-[70%] px-4 py-2 rounded-2xl text-sm ${isMine ? 'bg-primary text-white rounded-br-md' : 'bg-gray-100 text-secondary rounded-bl-md'}`} data-testid={`message-${idx}`}>
+                      <div className={`max-w-[80%] sm:max-w-[70%] px-4 py-2.5 rounded-2xl text-sm ${isMine ? 'bg-primary text-white rounded-br-md' : 'bg-gray-100 text-secondary rounded-bl-md'}`} data-testid={`message-${idx}`}>
                         {!isMine && <p className="text-xs font-semibold mb-0.5 opacity-70">{msg.sender?.firstName || ''}</p>}
                         <p>{msg.content}</p>
                         <p className={`text-[10px] mt-1 ${isMine ? 'text-white/60' : 'text-gray-400'}`}>{timeAgo(msg.createdAt)}</p>
@@ -168,9 +165,9 @@ export default function Chat() {
                 })}
                 <div ref={messagesEndRef} />
               </div>
-              <form onSubmit={sendMessage} className="p-4 border-t border-gray-100 flex gap-2">
+              <form onSubmit={sendMessage} className="p-3 sm:p-4 border-t border-gray-100 flex gap-2">
                 <input value={newMessage} onChange={e => setNewMessage(e.target.value)} placeholder="Type a message..." className="flex-1 px-4 py-2.5 border border-gray-200 rounded-full text-sm focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none" data-testid="chat-input" />
-                <button type="submit" className="w-10 h-10 bg-primary text-white rounded-full flex items-center justify-center hover:bg-primary/90 transition-colors" data-testid="chat-send">
+                <button type="submit" className="w-10 h-10 bg-primary text-white rounded-full flex items-center justify-center hover:bg-primary/90 transition-colors shrink-0" data-testid="chat-send">
                   <i className="fa-solid fa-paper-plane text-sm" />
                 </button>
               </form>

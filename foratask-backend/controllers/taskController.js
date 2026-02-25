@@ -144,7 +144,7 @@ const createTask = async (req, res) => {
                 }
             });
 
-            return res.status(200).json({ message: "Notifications inserted & push sent!" });
+            return res.status(200).json({ message: "Notifications inserted & push sent!", task: result, taskId: result._id });
         }
         return res.status(201).json({ message: "New Task saved!", task: result });
     }

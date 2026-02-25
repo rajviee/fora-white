@@ -16,7 +16,7 @@ def start_node_backend():
     env = os.environ.copy()
     env["PORT"] = str(NODE_BACKEND_PORT)
     node_process = subprocess.Popen(
-        ["node", "server.js"],
+        ["npx", "nodemon", "--watch", ".", "--ext", "js,json", "server.js"],
         cwd="/app/foratask-backend",
         env=env,
         stdout=subprocess.PIPE,

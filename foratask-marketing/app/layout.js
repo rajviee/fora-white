@@ -8,20 +8,14 @@ const inter = Inter({ subsets: ['latin'] })
 export const metadata = {
   title: 'ForaTask - Smart Task Management for Teams',
   description: 'ForaTask is a powerful multi-tenant task management platform designed for teams. Streamline workflows, track progress, and boost productivity with our intuitive solution.',
-  keywords: 'task management, team collaboration, project management, productivity, workflow automation',
+  keywords: 'task management, team collaboration, project management, productivity, workflow automation, attendance, chat, salary management',
   authors: [{ name: 'ForaTask' }],
   openGraph: {
     title: 'ForaTask - Smart Task Management for Teams',
     description: 'Streamline your team\'s workflow with ForaTask. Powerful task management, real-time collaboration, and smart automation.',
     url: 'https://foratask.com',
     siteName: 'ForaTask',
-    images: [
-      {
-        url: '/og-image.png',
-        width: 1200,
-        height: 630,
-      },
-    ],
+    images: [{ url: '/og-image.png', width: 1200, height: 630 }],
     locale: 'en_US',
     type: 'website',
   },
@@ -31,10 +25,7 @@ export const metadata = {
     description: 'Streamline your team\'s workflow with ForaTask',
     images: ['/og-image.png'],
   },
-  robots: {
-    index: true,
-    follow: true,
-  },
+  robots: { index: true, follow: true },
 }
 
 export default function RootLayout({ children }) {
@@ -43,7 +34,8 @@ export default function RootLayout({ children }) {
       <head>
         <link rel="icon" href="/favicon.ico" />
         <link rel="canonical" href="https://foratask.com" />
-        <meta name="theme-color" content="#0f172a" />
+        <meta name="theme-color" content="#1360C6" />
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{
@@ -64,7 +56,7 @@ export default function RootLayout({ children }) {
           }}
         />
       </head>
-      <body className={`${inter.className} bg-dark-950 text-white antialiased`}>
+      <body className={`${inter.className} bg-[#F8FAFC] text-[#1E293B] antialiased`}>
         <Navbar />
         <main className="min-h-screen">{children}</main>
         <Footer />

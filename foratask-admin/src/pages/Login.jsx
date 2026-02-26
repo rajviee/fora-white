@@ -26,15 +26,20 @@ export default function Login() {
   }
 
   return (
-    <div className="min-h-screen bg-[#F8FAFC] flex items-center justify-center p-4">
+    <div className="min-h-screen bg-[#F8FAFC] flex items-center justify-center p-4" data-testid="login-page">
       <div className="w-full max-w-md">
         <div className="text-center mb-8">
-          <img src="/logo.png" alt="ForaTask" className="h-10 mx-auto mb-3" />
-          <p className="text-gray-500 text-sm">Master Admin Portal</p>
+          <div className="inline-flex items-center gap-3 mb-2">
+            <div className="w-10 h-10 bg-primary rounded-xl flex items-center justify-center">
+              <span className="text-white font-bold text-lg">F</span>
+            </div>
+            <h1 className="text-2xl font-bold text-secondary">ForaTask</h1>
+          </div>
+          <p className="text-gray-500 text-sm mt-1">Master Admin Portal</p>
         </div>
 
         <div className="bg-white rounded-2xl p-8 shadow-sm border border-gray-100">
-          <h2 className="text-xl font-semibold text-secondary text-center mb-6">Sign In</h2>
+          <h2 className="text-lg font-semibold text-secondary text-center mb-6">Sign In</h2>
 
           {error && (
             <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg flex items-center gap-2 text-red-600 text-sm">
@@ -43,7 +48,7 @@ export default function Login() {
             </div>
           )}
 
-          <form onSubmit={handleSubmit} className="space-y-4">
+          <form onSubmit={handleSubmit} className="space-y-5">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1.5">Email</label>
               <div className="relative">
@@ -52,7 +57,7 @@ export default function Login() {
                   type="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className="w-full pl-10 pr-4 py-2.5 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[rgba(19,96,198,0.2)] focus:border-[#1360C6]"
+                  className="w-full pl-10 pr-4 py-2.5 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all"
                   placeholder="admin@foratask.com"
                   required
                   data-testid="login-email"
@@ -68,7 +73,7 @@ export default function Login() {
                   type="password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="w-full pl-10 pr-4 py-2.5 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[rgba(19,96,198,0.2)] focus:border-[#1360C6]"
+                  className="w-full pl-10 pr-4 py-2.5 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all"
                   placeholder="Enter password"
                   required
                   data-testid="login-password"
@@ -79,7 +84,7 @@ export default function Login() {
             <button
               type="submit"
               disabled={loading}
-              className="w-full py-2.5 bg-[#1360C6] hover:bg-[#0F4C9E] text-white font-medium rounded-lg transition-colors disabled:opacity-50 text-sm"
+              className="w-full py-2.5 bg-primary hover:bg-primary/90 text-white font-medium rounded-lg transition-colors disabled:opacity-50 text-sm"
               data-testid="login-submit"
             >
               {loading ? 'Signing in...' : 'Sign In'}

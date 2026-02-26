@@ -12,21 +12,14 @@ export default function Login() {
     e.preventDefault()
     setError('')
     setLoading(true)
-
     try {
       const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/auth/login`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email, password })
       })
-
       const data = await response.json()
-
-      if (!response.ok) {
-        throw new Error(data.message || 'Login failed')
-      }
-
-      // Store token and redirect to app
+      if (!response.ok) throw new Error(data.message || 'Login failed')
       localStorage.setItem('token', data.token)
       window.location.href = process.env.NEXT_PUBLIC_APP_URL || '/'
     } catch (err) {
@@ -40,70 +33,53 @@ export default function Login() {
     <div className="pt-24 pb-16 px-4 min-h-screen flex items-center justify-center">
       <div className="max-w-md w-full">
         <div className="text-center mb-8">
-          <h1 className="text-3xl font-bold mb-2">Welcome Back</h1>
-          <p className="text-dark-400">Sign in to your ForaTask account</p>
+          <div className="inline-flex items-center gap-3 mb-2">
+            <div className="w-10 h-10 bg-primary rounded-xl flex items-center justify-center">
+              <span className="text-white font-bold text-lg">F</span>
+            </div>
+            <h1 className="text-2xl font-bold text-secondary">ForaTask</h1>
+          </div>
+          <p className="text-gray-500 text-sm mt-1">Sign in to your account</p>
         </div>
 
-        <div className="glass rounded-2xl p-8">
+        <div className="bg-white rounded-2xl p-8 border border-gray-100 shadow-sm">
           {error && (
-            <div className="mb-4 p-4 bg-red-500/10 border border-red-500/30 rounded-xl text-red-400">
-              {error}
-            </div>
+            <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg text-red-600 text-sm">{error}</div>
           )}
 
-          <form onSubmit={handleSubmit} className="space-y-4">
+          <form onSubmit={handleSubmit} className="space-y-5">
             <div>
-              <label className="block text-sm font-medium mb-2">Email</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1.5">Email</label>
               <div className="relative">
-                <Mail className="absolute left-4 top-1/2 -translate-y-1/2 text-dark-400 w-5 h-5" />
-                <input
-                  type="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  required
-                  className="w-full pl-12 pr-4 py-3 bg-dark-900 border border-dark-700 rounded-xl focus:outline-none focus:border-primary-500"
-                  placeholder="you@example.com"
-                />
+                <Mail className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={16} />
+                <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} required
+                  className="w-full pl-10 pr-4 py-2.5 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary" placeholder="you@example.com" />
               </div>
             </div>
-
             <div>
-              <label className="block text-sm font-medium mb-2">Password</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1.5">Password</label>
               <div className="relative">
-                <Lock className="absolute left-4 top-1/2 -translate-y-1/2 text-dark-400 w-5 h-5" />
-                <input
-                  type="password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  required
-                  className="w-full pl-12 pr-4 py-3 bg-dark-900 border border-dark-700 rounded-xl focus:outline-none focus:border-primary-500"
-                  placeholder="••••••••"
-                />
+                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={16} />
+                <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} required
+                  className="w-full pl-10 pr-4 py-2.5 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary" placeholder="Enter your password" />
               </div>
             </div>
-
-            <button
-              type="submit"
-              disabled={loading}
-              className="w-full py-3 bg-gradient-to-r from-primary-600 to-primary-500 rounded-xl font-semibold hover:from-primary-500 hover:to-primary-400 transition-all disabled:opacity-50"
-            >
+            <button type="submit" disabled={loading}
+              className="w-full py-2.5 bg-primary hover:bg-primary-dark text-white rounded-lg font-medium text-sm transition-colors disabled:opacity-50">
               {loading ? 'Signing in...' : 'Sign In'}
             </button>
           </form>
 
-          <div className="mt-6 text-center">
-            <a 
-              href={process.env.NEXT_PUBLIC_APP_URL || '#'}
-              className="inline-flex items-center gap-2 text-primary-400 hover:underline"
-            >
-              Open Mobile App <ExternalLink className="w-4 h-4" />
+          <div className="mt-5 text-center">
+            <a href={process.env.NEXT_PUBLIC_APP_URL || '#'} className="inline-flex items-center gap-1.5 text-primary text-sm hover:underline font-medium">
+              Open App <ExternalLink className="w-3.5 h-3.5" />
             </a>
           </div>
         </div>
 
-        <p className="text-center text-dark-400 mt-6">
+        <p className="text-center text-gray-400 mt-6 text-sm">
           Don't have an account?{' '}
-          <a href="/signup" className="text-primary-400 hover:underline">Start free trial</a>
+          <a href="/signup" className="text-primary hover:underline font-medium">Start free trial</a>
         </p>
       </div>
     </div>

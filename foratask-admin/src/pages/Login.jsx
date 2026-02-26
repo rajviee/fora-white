@@ -15,7 +15,6 @@ export default function Login() {
     e.preventDefault()
     setError('')
     setLoading(true)
-
     try {
       await login(email, password)
       navigate('/')
@@ -27,33 +26,33 @@ export default function Login() {
   }
 
   return (
-    <div className="min-h-screen bg-dark-200 flex items-center justify-center p-4">
+    <div className="min-h-screen bg-[#F8FAFC] flex items-center justify-center p-4">
       <div className="w-full max-w-md">
         <div className="text-center mb-8">
-          <h1 className="text-4xl font-bold text-primary-400 mb-2">ForaTask</h1>
-          <p className="text-slate-400">Master Admin Portal</p>
+          <img src="/logo.png" alt="ForaTask" className="h-10 mx-auto mb-3" />
+          <p className="text-gray-500 text-sm">Master Admin Portal</p>
         </div>
 
-        <div className="bg-dark-100 rounded-2xl p-8 shadow-xl border border-slate-700">
-          <h2 className="text-2xl font-semibold text-center mb-6">Sign In</h2>
+        <div className="bg-white rounded-2xl p-8 shadow-sm border border-gray-100">
+          <h2 className="text-xl font-semibold text-secondary text-center mb-6">Sign In</h2>
 
           {error && (
-            <div className="mb-4 p-3 bg-red-500/10 border border-red-500/50 rounded-lg flex items-center gap-2 text-red-400">
-              <AlertCircle size={18} />
+            <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg flex items-center gap-2 text-red-600 text-sm">
+              <AlertCircle size={16} />
               <span data-testid="login-error">{error}</span>
             </div>
           )}
 
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
-              <label className="block text-sm font-medium text-slate-300 mb-1">Email</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1.5">Email</label>
               <div className="relative">
-                <Mail className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
+                <Mail className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={16} />
                 <input
                   type="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className="w-full pl-10 pr-4 py-3 bg-dark-200 border border-slate-600 rounded-lg focus:outline-none focus:border-primary-500 text-white"
+                  className="w-full pl-10 pr-4 py-2.5 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[rgba(19,96,198,0.2)] focus:border-[#1360C6]"
                   placeholder="admin@foratask.com"
                   required
                   data-testid="login-email"
@@ -62,15 +61,15 @@ export default function Login() {
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-slate-300 mb-1">Password</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1.5">Password</label>
               <div className="relative">
-                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
+                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={16} />
                 <input
                   type="password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="w-full pl-10 pr-4 py-3 bg-dark-200 border border-slate-600 rounded-lg focus:outline-none focus:border-primary-500 text-white"
-                  placeholder="••••••••"
+                  className="w-full pl-10 pr-4 py-2.5 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[rgba(19,96,198,0.2)] focus:border-[#1360C6]"
+                  placeholder="Enter password"
                   required
                   data-testid="login-password"
                 />
@@ -80,7 +79,7 @@ export default function Login() {
             <button
               type="submit"
               disabled={loading}
-              className="w-full py-3 bg-primary-600 hover:bg-primary-700 text-white font-medium rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              className="w-full py-2.5 bg-[#1360C6] hover:bg-[#0F4C9E] text-white font-medium rounded-lg transition-colors disabled:opacity-50 text-sm"
               data-testid="login-submit"
             >
               {loading ? 'Signing in...' : 'Sign In'}

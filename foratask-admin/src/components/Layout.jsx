@@ -20,85 +20,62 @@ export default function Layout() {
   }
 
   return (
-    <div className="min-h-screen bg-dark-200 flex">
-      {/* Mobile sidebar backdrop */}
+    <div className="min-h-screen bg-[#F8FAFC] flex">
       {sidebarOpen && (
-        <div 
-          className="fixed inset-0 bg-black/50 z-20 lg:hidden"
-          onClick={() => setSidebarOpen(false)}
-        />
+        <div className="fixed inset-0 bg-black/30 z-20 lg:hidden" onClick={() => setSidebarOpen(false)} />
       )}
 
       {/* Sidebar */}
-      <aside className={`
-        fixed lg:static inset-y-0 left-0 z-30
-        w-64 bg-dark-100 border-r border-slate-700
-        transform transition-transform duration-200 ease-in-out
-        ${sidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
-      `}>
+      <aside className={`fixed lg:static inset-y-0 left-0 z-30 w-[200px] bg-[#1360C6] text-white transform transition-transform duration-200 ${sidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}`}>
         <div className="flex flex-col h-full">
           {/* Logo */}
-          <div className="p-6 border-b border-slate-700">
-            <h1 className="text-2xl font-bold text-primary-400">ForaTask</h1>
-            <p className="text-sm text-slate-400">Admin Panel</p>
+          <div className="px-4 h-16 flex items-center gap-2 shrink-0">
+            <img src="/logo.png" alt="ForaTask" className="h-8 w-auto brightness-0 invert" />
           </div>
 
-          {/* Navigation */}
-          <nav className="flex-1 p-4 space-y-2">
+          <nav className="flex-1 px-3 mt-2 space-y-0.5">
             {navItems.map((item) => (
               <Link
                 key={item.path}
                 to={item.path}
                 onClick={() => setSidebarOpen(false)}
-                className={`
-                  flex items-center gap-3 px-4 py-3 rounded-lg transition-colors
-                  ${isActive(item.path) 
-                    ? 'bg-primary-600 text-white' 
-                    : 'text-slate-300 hover:bg-slate-700/50'}
-                `}
+                className={`flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm font-medium transition-colors ${isActive(item.path) ? 'bg-white/20 text-white' : 'text-white/80 hover:bg-white/10 hover:text-white'}`}
                 data-testid={`nav-${item.label.toLowerCase()}`}
               >
-                <item.icon size={20} />
+                <item.icon size={18} />
                 {item.label}
               </Link>
             ))}
           </nav>
 
-          {/* User info */}
-          <div className="p-4 border-t border-slate-700">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="font-medium">{admin?.firstName} {admin?.lastName}</p>
-                <p className="text-sm text-slate-400">{admin?.email}</p>
-              </div>
-              <button
-                onClick={logout}
-                className="p-2 text-slate-400 hover:text-red-400 transition-colors"
-                data-testid="logout-btn"
-              >
-                <LogOut size={20} />
-              </button>
+          <div className="p-3 mt-auto border-t border-white/10">
+            <div className="px-3 py-2 mb-2">
+              <p className="text-sm font-medium text-white truncate">{admin?.firstName} {admin?.lastName}</p>
+              <p className="text-xs text-white/60 truncate">{admin?.email}</p>
             </div>
+            <button
+              onClick={logout}
+              className="w-full flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm text-white/80 hover:bg-white/10 hover:text-white transition-colors"
+              data-testid="logout-btn"
+            >
+              <LogOut size={18} />
+              Sign Out
+            </button>
           </div>
         </div>
       </aside>
 
-      {/* Main content */}
       <div className="flex-1 flex flex-col min-w-0">
-        {/* Mobile header */}
-        <header className="lg:hidden bg-dark-100 border-b border-slate-700 p-4 flex items-center justify-between">
-          <button
-            onClick={() => setSidebarOpen(true)}
-            className="p-2 text-slate-300 hover:text-white"
-          >
+        {/* Top bar */}
+        <header className="h-16 bg-white border-b border-gray-200 flex items-center px-4 lg:px-6 shrink-0">
+          <button onClick={() => setSidebarOpen(true)} className="lg:hidden mr-3 text-gray-600 hover:text-gray-900">
             <Menu size={24} />
           </button>
-          <h1 className="text-xl font-bold text-primary-400">ForaTask Admin</h1>
-          <div className="w-10" />
+          <h1 className="text-lg font-semibold text-secondary lg:hidden">ForaTask Admin</h1>
+          <div className="flex-1" />
         </header>
 
-        {/* Page content */}
-        <main className="flex-1 p-6 overflow-auto">
+        <main className="flex-1 p-3 sm:p-4 lg:p-6 overflow-auto">
           <Outlet />
         </main>
       </div>

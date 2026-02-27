@@ -1,74 +1,37 @@
 'use client'
 import { useState } from 'react'
-import { useRouter } from 'next/navigation'
 import { Building2, User, Mail, Lock, Phone, ArrowRight, ArrowLeft, CheckCircle } from 'lucide-react'
 
 export default function SignUp() {
-  const router = useRouter()
   const [step, setStep] = useState(1)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
   
-  const [companyData, setCompanyData] = useState({
-    companyName: '',
-    companyEmail: '',
-    companyContactNumber: ''
-  })
-  
-  const [userData, setUserData] = useState({
-    firstName: '',
-    lastName: '',
-    email: '',
-    password: '',
-    confirmPassword: ''
-  })
+  const [companyData, setCompanyData] = useState({ companyName: '', companyEmail: '', companyContactNumber: '' })
+  const [userData, setUserData] = useState({ firstName: '', lastName: '', email: '', password: '', confirmPassword: '' })
 
-  const handleCompanyChange = (e) => {
-    setCompanyData({ ...companyData, [e.target.name]: e.target.value })
-  }
-
-  const handleUserChange = (e) => {
-    setUserData({ ...userData, [e.target.name]: e.target.value })
-  }
+  const handleCompanyChange = (e) => setCompanyData({ ...companyData, [e.target.name]: e.target.value })
+  const handleUserChange = (e) => setUserData({ ...userData, [e.target.name]: e.target.value })
 
   const handleSubmit = async (e) => {
     e.preventDefault()
     setError('')
-    
-    if (userData.password !== userData.confirmPassword) {
-      setError('Passwords do not match')
-      return
-    }
-
+    if (userData.password !== userData.confirmPassword) { setError('Passwords do not match'); return }
     setLoading(true)
-
     try {
       const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/auth/register`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          ...companyData,
-          firstName: userData.firstName,
-          lastName: userData.lastName,
-          email: userData.email,
-          password: userData.password
-        })
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ ...companyData, firstName: userData.firstName, lastName: userData.lastName, email: userData.email, password: userData.password })
       })
-
       const data = await response.json()
-
-      if (!response.ok) {
-        throw new Error(data.message || 'Registration failed')
-      }
-
-      // Success - show step 3
+      if (!response.ok) throw new Error(data.message || 'Registration failed')
       setStep(3)
-    } catch (err) {
-      setError(err.message)
-    } finally {
-      setLoading(false)
-    }
+    } catch (err) { setError(err.message) }
+    finally { setLoading(false) }
   }
+
+  const inputCls = "w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
+  const inputIconCls = "w-full pl-10 pr-4 py-2.5 bg-gray-50 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
 
   return (
     <div className="pt-24 pb-16 px-4 min-h-screen">
@@ -77,80 +40,50 @@ export default function SignUp() {
         <div className="flex items-center justify-center gap-4 mb-12">
           {[1, 2, 3].map((s) => (
             <div key={s} className="flex items-center gap-4">
-              <div className={`w-10 h-10 rounded-full flex items-center justify-center font-semibold ${
-                step >= s 
-                  ? 'bg-primary-500 text-white' 
-                  : 'bg-dark-700 text-dark-400'
+              <div className={`w-9 h-9 rounded-full flex items-center justify-center font-semibold text-sm ${
+                step >= s ? 'bg-primary text-white' : 'bg-gray-200 text-gray-400'
               }`}>
-                {step > s ? <CheckCircle className="w-5 h-5" /> : s}
+                {step > s ? <CheckCircle className="w-4 h-4" /> : s}
               </div>
-              {s < 3 && <div className={`w-12 h-0.5 ${step > s ? 'bg-primary-500' : 'bg-dark-700'}`} />}
+              {s < 3 && <div className={`w-10 h-0.5 ${step > s ? 'bg-primary' : 'bg-gray-200'}`} />}
             </div>
           ))}
         </div>
 
-        <div className="glass rounded-2xl p-8">
+        <div className="bg-white rounded-2xl p-8 border border-gray-100 shadow-sm">
           {step === 1 && (
             <>
               <div className="flex items-center gap-3 mb-6">
-                <div className="w-12 h-12 rounded-xl bg-primary-500/20 flex items-center justify-center">
-                  <Building2 className="w-6 h-6 text-primary-400" />
+                <div className="w-10 h-10 rounded-xl bg-primary-light flex items-center justify-center">
+                  <Building2 className="w-5 h-5 text-primary" />
                 </div>
                 <div>
-                  <h1 className="text-2xl font-bold">Company Information</h1>
-                  <p className="text-dark-400">Step 1 of 2</p>
+                  <h1 className="text-lg font-bold text-secondary">Company Information</h1>
+                  <p className="text-gray-400 text-xs">Step 1 of 2</p>
                 </div>
               </div>
 
               <form onSubmit={(e) => { e.preventDefault(); setStep(2) }} className="space-y-4">
                 <div>
-                  <label className="block text-sm font-medium mb-2">Company Name *</label>
-                  <input
-                    type="text"
-                    name="companyName"
-                    value={companyData.companyName}
-                    onChange={handleCompanyChange}
-                    required
-                    className="w-full px-4 py-3 bg-dark-900 border border-dark-700 rounded-xl focus:outline-none focus:border-primary-500"
-                    placeholder="Acme Inc."
-                  />
+                  <label className="block text-sm font-medium text-gray-700 mb-1.5">Company Name *</label>
+                  <input type="text" name="companyName" value={companyData.companyName} onChange={handleCompanyChange} required className={inputCls} placeholder="Acme Inc." />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium mb-2">Company Email *</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-1.5">Company Email *</label>
                   <div className="relative">
-                    <Mail className="absolute left-4 top-1/2 -translate-y-1/2 text-dark-400 w-5 h-5" />
-                    <input
-                      type="email"
-                      name="companyEmail"
-                      value={companyData.companyEmail}
-                      onChange={handleCompanyChange}
-                      required
-                      autoComplete="email"
-                      className="w-full pl-12 pr-4 py-3 bg-dark-900 border border-dark-700 rounded-xl focus:outline-none focus:border-primary-500"
-                      placeholder="contact@company.com"
-                    />
+                    <Mail className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={16} />
+                    <input type="email" name="companyEmail" value={companyData.companyEmail} onChange={handleCompanyChange} required className={inputIconCls} placeholder="contact@company.com" />
                   </div>
                 </div>
                 <div>
-                  <label className="block text-sm font-medium mb-2">Contact Number *</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-1.5">Contact Number *</label>
                   <div className="relative">
-                    <Phone className="absolute left-4 top-1/2 -translate-y-1/2 text-dark-400 w-5 h-5" />
-                    <input
-                      type="tel"
-                      name="companyContactNumber"
-                      value={companyData.companyContactNumber}
-                      onChange={handleCompanyChange}
-                      required
-                      className="w-full pl-12 pr-4 py-3 bg-dark-900 border border-dark-700 rounded-xl focus:outline-none focus:border-primary-500"
-                      placeholder="+91 98765 43210"
-                    />
+                    <Phone className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={16} />
+                    <input type="tel" name="companyContactNumber" value={companyData.companyContactNumber} onChange={handleCompanyChange} required className={inputIconCls} placeholder="+91 98765 43210" />
                   </div>
                 </div>
-                <button
-                  type="submit"
-                  className="w-full py-3 bg-gradient-to-r from-primary-600 to-primary-500 rounded-xl font-semibold flex items-center justify-center gap-2 hover:from-primary-500 hover:to-primary-400 transition-all"
-                >
-                  Continue <ArrowRight className="w-5 h-5" />
+                <button type="submit" className="w-full py-2.5 bg-primary text-white rounded-lg font-medium text-sm flex items-center justify-center gap-2 hover:bg-primary-dark transition-all">
+                  Continue <ArrowRight className="w-4 h-4" />
                 </button>
               </form>
             </>
@@ -159,109 +92,56 @@ export default function SignUp() {
           {step === 2 && (
             <>
               <div className="flex items-center gap-3 mb-6">
-                <div className="w-12 h-12 rounded-xl bg-primary-500/20 flex items-center justify-center">
-                  <User className="w-6 h-6 text-primary-400" />
+                <div className="w-10 h-10 rounded-xl bg-primary-light flex items-center justify-center">
+                  <User className="w-5 h-5 text-primary" />
                 </div>
                 <div>
-                  <h1 className="text-2xl font-bold">Admin Account</h1>
-                  <p className="text-dark-400">Step 2 of 2</p>
+                  <h1 className="text-lg font-bold text-secondary">Admin Account</h1>
+                  <p className="text-gray-400 text-xs">Step 2 of 2</p>
                 </div>
               </div>
 
-              {error && (
-                <div className="mb-4 p-4 bg-red-500/10 border border-red-500/30 rounded-xl text-red-400">
-                  {error}
-                </div>
-              )}
+              {error && <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg text-red-600 text-sm">{error}</div>}
 
               <form onSubmit={handleSubmit} className="space-y-4">
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-sm font-medium mb-2">First Name *</label>
-                    <input
-                      type="text"
-                      name="firstName"
-                      value={userData.firstName}
-                      onChange={handleUserChange}
-                      required
-                      className="w-full px-4 py-3 bg-dark-900 border border-dark-700 rounded-xl focus:outline-none focus:border-primary-500"
-                      placeholder="John"
-                    />
+                    <label className="block text-sm font-medium text-gray-700 mb-1.5">First Name *</label>
+                    <input type="text" name="firstName" value={userData.firstName} onChange={handleUserChange} required className={inputCls} placeholder="John" />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium mb-2">Last Name *</label>
-                    <input
-                      type="text"
-                      name="lastName"
-                      value={userData.lastName}
-                      onChange={handleUserChange}
-                      required
-                      className="w-full px-4 py-3 bg-dark-900 border border-dark-700 rounded-xl focus:outline-none focus:border-primary-500"
-                      placeholder="Doe"
-                    />
+                    <label className="block text-sm font-medium text-gray-700 mb-1.5">Last Name *</label>
+                    <input type="text" name="lastName" value={userData.lastName} onChange={handleUserChange} required className={inputCls} placeholder="Doe" />
                   </div>
                 </div>
                 <div>
-                  <label className="block text-sm font-medium mb-2">Email *</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-1.5">Email *</label>
                   <div className="relative">
-                    <Mail className="absolute left-4 top-1/2 -translate-y-1/2 text-dark-400 w-5 h-5" />
-                    <input
-                      type="email"
-                      name="email"
-                      value={userData.email}
-                      onChange={handleUserChange}
-                      required
-                      className="w-full pl-12 pr-4 py-3 bg-dark-900 border border-dark-700 rounded-xl focus:outline-none focus:border-primary-500"
-                      placeholder="john@company.com"
-                    />
+                    <Mail className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={16} />
+                    <input type="email" name="email" value={userData.email} onChange={handleUserChange} required className={inputIconCls} placeholder="john@company.com" />
                   </div>
                 </div>
                 <div>
-                  <label className="block text-sm font-medium mb-2">Password *</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-1.5">Password *</label>
                   <div className="relative">
-                    <Lock className="absolute left-4 top-1/2 -translate-y-1/2 text-dark-400 w-5 h-5" />
-                    <input
-                      type="password"
-                      name="password"
-                      value={userData.password}
-                      onChange={handleUserChange}
-                      required
-                      minLength={8}
-                      className="w-full pl-12 pr-4 py-3 bg-dark-900 border border-dark-700 rounded-xl focus:outline-none focus:border-primary-500"
-                      placeholder="••••••••"
-                    />
+                    <Lock className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={16} />
+                    <input type="password" name="password" value={userData.password} onChange={handleUserChange} required minLength={8} className={inputIconCls} placeholder="Min 8 characters" />
                   </div>
-                  <p className="text-xs text-dark-400 mt-1">Min 8 chars with uppercase, lowercase, number & special char</p>
+                  <p className="text-xs text-gray-400 mt-1">Min 8 chars with uppercase, lowercase, number & special char</p>
                 </div>
                 <div>
-                  <label className="block text-sm font-medium mb-2">Confirm Password *</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-1.5">Confirm Password *</label>
                   <div className="relative">
-                    <Lock className="absolute left-4 top-1/2 -translate-y-1/2 text-dark-400 w-5 h-5" />
-                    <input
-                      type="password"
-                      name="confirmPassword"
-                      value={userData.confirmPassword}
-                      onChange={handleUserChange}
-                      required
-                      className="w-full pl-12 pr-4 py-3 bg-dark-900 border border-dark-700 rounded-xl focus:outline-none focus:border-primary-500"
-                      placeholder="••••••••"
-                    />
+                    <Lock className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={16} />
+                    <input type="password" name="confirmPassword" value={userData.confirmPassword} onChange={handleUserChange} required className={inputIconCls} placeholder="Re-enter password" />
                   </div>
                 </div>
 
-                <div className="flex gap-4">
-                  <button
-                    type="button"
-                    onClick={() => setStep(1)}
-                    className="px-6 py-3 bg-dark-700 rounded-xl font-medium flex items-center gap-2 hover:bg-dark-600 transition-all"
-                  >
-                    <ArrowLeft className="w-5 h-5" /> Back
+                <div className="flex gap-3">
+                  <button type="button" onClick={() => setStep(1)} className="px-5 py-2.5 bg-gray-100 text-gray-700 rounded-lg font-medium text-sm flex items-center gap-2 hover:bg-gray-200 transition-all">
+                    <ArrowLeft className="w-4 h-4" /> Back
                   </button>
-                  <button
-                    type="submit"
-                    disabled={loading}
-                    className="flex-1 py-3 bg-gradient-to-r from-primary-600 to-primary-500 rounded-xl font-semibold flex items-center justify-center gap-2 hover:from-primary-500 hover:to-primary-400 transition-all disabled:opacity-50"
-                  >
+                  <button type="submit" disabled={loading} className="flex-1 py-2.5 bg-primary text-white rounded-lg font-medium text-sm hover:bg-primary-dark transition-all disabled:opacity-50">
                     {loading ? 'Creating Account...' : 'Create Account'}
                   </button>
                 </div>
@@ -271,27 +151,23 @@ export default function SignUp() {
 
           {step === 3 && (
             <div className="text-center py-8">
-              <div className="w-20 h-20 rounded-full bg-accent-500/20 flex items-center justify-center mx-auto mb-6">
-                <CheckCircle className="w-10 h-10 text-accent-500" />
+              <div className="w-16 h-16 rounded-full bg-green-50 flex items-center justify-center mx-auto mb-6">
+                <CheckCircle className="w-8 h-8 text-accent" />
               </div>
-              <h1 className="text-2xl font-bold mb-4">Account Created!</h1>
-              <p className="text-dark-300 mb-8">
-                Your company account has been created with a 90-day free trial. 
-                Check your email for login instructions.
+              <h1 className="text-xl font-bold text-secondary mb-3">Account Created!</h1>
+              <p className="text-gray-500 text-sm mb-8">
+                Your company account has been created with a 90-day free trial. Check your email for login instructions.
               </p>
-              <a
-                href={process.env.NEXT_PUBLIC_APP_URL || '/login'}
-                className="inline-block px-8 py-3 bg-gradient-to-r from-primary-600 to-primary-500 rounded-xl font-semibold hover:from-primary-500 hover:to-primary-400 transition-all"
-              >
+              <a href={process.env.NEXT_PUBLIC_APP_URL || '/login'} className="inline-block px-8 py-2.5 bg-primary text-white rounded-lg font-medium text-sm hover:bg-primary-dark transition-all">
                 Go to Login
               </a>
             </div>
           )}
         </div>
 
-        <p className="text-center text-dark-400 mt-6">
+        <p className="text-center text-gray-400 mt-6 text-sm">
           Already have an account?{' '}
-          <a href="/login" className="text-primary-400 hover:underline">Log in</a>
+          <a href="/login" className="text-primary hover:underline font-medium">Log in</a>
         </p>
       </div>
     </div>

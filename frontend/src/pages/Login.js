@@ -15,12 +15,58 @@ export default function Login() {
     e.preventDefault();
     setError('');
     setLoading(true);
+    
+    // Diagnostic logging for debugging
+    console.log('Login Attempt for:', email);
+
     try {
-      const res = await api.post('/auth/login', { email, password });
-      login(res.data.token, res.data.subscription);
-      navigate('/dashboard');
+      // 1. Perform Login API Call
+      // api.js handles the baseURL (e.g., http://192.168.0.104:3000/api)
+      const res = await api.post('auth/login', { email, password });
+      
+      console.log('Login Response received:', res.status, res.data);
+
+      // 2. Extract Token and Subscription from various possible structures
+      // Backend might return { token, subscription } or { data: { token, subscription } }
+      // Or might return token as the root object directly
+      const token = res.data?.token || res.data?.data?.token || (typeof res.data === 'string' ? res.data : null);
+      const subscription = res.data?.subscription || res.data?.data?.subscription;
+
+      // 3. Validation
+      if (!token) {
+        console.error('Login Error: Server response missing token', res.data);
+        throw new Error('Login failed: Token not provided by server');
+      }
+
+      // 4. Update Auth State (Context + LocalStorage)
+      // login() handles storage and jwt decoding safely
+      await login(token, subscription);
+      
+      console.log('Login state updated successfully. Navigating...');
+
+      // 5. Navigation
+      // Force navigation to dashboard
+      navigate('/dashboard', { replace: true });
+
     } catch (err) {
-      setError(err.response?.data?.message || 'Login failed');
+      console.error('Login Catch block:', err);
+      
+      // 6. Detailed Error Messaging
+      let msg = 'Login failed. Please check your credentials.';
+      
+      if (err.message === 'Network Error') {
+        msg = 'Connection Error: Check if server is running or if backend URL is correct.';
+      } else if (err.response?.status === 401) {
+        msg = 'Invalid email or password.';
+      } else if (err.response?.status === 404) {
+        msg = 'Server endpoint not found. Contact administrator.';
+      } else if (err.response?.data?.message || err.response?.data?.error) {
+        msg = err.response.data.message || err.response.data.error;
+      } else if (err.message) {
+        msg = err.message;
+      }
+      
+      setError(msg);
     } finally {
       setLoading(false);
     }

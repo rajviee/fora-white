@@ -1,3 +1,5 @@
+const dotenv = require("dotenv");
+dotenv.config();
 const express = require("express");
 const mongoose = require("mongoose");
 const authRoute = require("./routes/auth");
@@ -35,10 +37,7 @@ const app = express();
 const http = require("http");
 const { Server } = require("socket.io");
 const server = http.createServer(app);
-const dotenv = require("dotenv");
 const cookie = require("cookie-parser");
-
-dotenv.config();
 const io = new Server(server, {
   path: "/socket.io",
   cors: {
@@ -55,23 +54,23 @@ const PORT = process.env.PORT || 3000;
 const MONGO_URI = process.env.MONGO_URI;
 
 // Routes
-app.use('/auth', authRoute);
-app.use('/me', authMiddleware, userRoute);
-app.use('/task', authMiddleware, taskRoute);
-app.use('/task-extended', authMiddleware, taskExtendedRoute);
-app.use('/uploads', express.static('uploads'));
-app.use('/stats', authMiddleware, statsRoute);
-app.use('/notifications/', authMiddleware, notificationRoute);
-app.use('/reports', authMiddleware, reportRoute);
-app.use('/payment', paymentRoute);
-app.use('/master-admin', masterAdminRoute);
+app.use('/api/auth', authRoute);
+app.use('/api/me', authMiddleware, userRoute);
+app.use('/api/task', authMiddleware, taskRoute);
+app.use('/api/task-extended', authMiddleware, taskExtendedRoute);
+app.use('/api/uploads', express.static('uploads'));
+app.use('/api/stats', authMiddleware, statsRoute);
+app.use('/api/notifications/', authMiddleware, notificationRoute);
+app.use('/api/reports', authMiddleware, reportRoute);
+app.use('/api/payment', paymentRoute);
+app.use('/api/master-admin', masterAdminRoute);
 // New module routes
-app.use('/chat', chatRoute);
-app.use('/attendance', attendanceRoute);
-app.use('/organization-settings', organizationSettingsRoute);
-app.use('/salary', salaryRoute);
-app.use('/leave', leaveRoute);
-app.use('/', authMiddleware, adminRoute);
+app.use('/api/chat', chatRoute);
+app.use('/api/attendance', attendanceRoute);
+app.use('/api/organization-settings', organizationSettingsRoute);
+app.use('/api/salary', salaryRoute);
+app.use('/api/leave', leaveRoute);
+app.use('/api/', authMiddleware, adminRoute);
 
 // Global references for socket.io
 global.io = io;

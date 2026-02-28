@@ -1,6 +1,6 @@
 const express = require("express");
 const router = express.Router();
-const bcrypt = require("bcrypt");
+const bcrypt = require("bcryptjs");
 
 const User = require("../models/user");
 const Company = require('../models/company');
@@ -15,7 +15,7 @@ const FREE_TRIAL_DAYS = parseInt(process.env.FREE_TRIAL_DAYS) || 90;
 router.post('/login', async (req, res) => {
   try {
     console.log(req.body);
-    const email = req.body.email;
+    const email = req.body.email ? req.body.email.toLowerCase() : "";
     const password = req.body.password;
     const user = await User.findOne({ email });
     if (!user) {

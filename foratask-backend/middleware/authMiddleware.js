@@ -16,7 +16,8 @@ const auth = (req, res, next) => {
     }
 
     // Verify token
-    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    const secret = process.env.JWT_SECRET || "jwt-token-foratask";
+    const decoded = jwt.verify(token, secret);
     req.user = decoded; // e.g. { id: user._id }
     next();
   } catch (err) {

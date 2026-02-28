@@ -30,14 +30,8 @@ export default function Layout() {
       {/* Sidebar */}
       <aside className={`fixed lg:static inset-y-0 left-0 z-40 w-[200px] bg-primary text-white flex flex-col transform transition-transform lg:translate-x-0 ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'}`} data-testid="admin-sidebar">
         {/* Logo */}
-        <div className="flex items-center gap-2 px-5 h-16 shrink-0">
-          <div className="w-8 h-8 bg-white/20 rounded-lg flex items-center justify-center">
-            <span className="text-white font-bold text-sm">F</span>
-          </div>
-          <div>
-            <span className="font-bold text-base">ForaTask</span>
-            <span className="text-white/60 text-[10px] block -mt-0.5">Admin</span>
-          </div>
+        <div className="flex items-center justify-center gap-2 px-5 h-16 shrink-0 mt-5 mb-5">
+             <img src="/fora-logo-white.svg" alt="Logo"/>
         </div>
 
         {/* Nav */}

@@ -43,13 +43,8 @@ export default function Layout() {
       {/* Sidebar */}
       <aside className={`fixed lg:static inset-y-0 left-0 z-40 w-[200px] bg-primary text-white flex flex-col transform transition-transform lg:translate-x-0 ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'}`} data-testid="sidebar">
         {/* Logo */}
-        <div className="flex items-center gap-2 px-5 h-16 shrink-0">
-          <span className="text-[#FFD700] font-bold text-xl tracking-tight">f</span>
-          <span className="text-[#FFD700] font-bold text-lg">o</span>
-          <span className="text-white font-bold text-xl">ra</span>
-          <div className="ml-0.5">
-            <span className="text-white font-bold text-lg">task</span>
-          </div>
+              <div className="flex items-center justify-center gap-2 px-5 h-16 shrink-0 mt-5 mb-5">
+             <img src="/fora-logo-white.svg" alt="Logo"/>
         </div>
 
         {/* Nav */}

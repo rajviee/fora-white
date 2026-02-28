@@ -1,5 +1,4 @@
 import Link from 'next/link'
-
 export default function Footer() {
   return (
     <footer className="bg-white border-t border-gray-100 py-16">
@@ -8,10 +7,7 @@ export default function Footer() {
           {/* Brand */}
           <div>
             <Link href="/" className="flex items-center gap-2 mb-4">
-              <div className="w-9 h-9 rounded-xl bg-primary flex items-center justify-center">
-                <span className="text-white font-bold text-base">F</span>
-              </div>
-              <span className="text-xl font-bold text-secondary">ForaTask</span>
+             <img src="/fora-logo-in-line.svg" alt="Logo"/>
             </Link>
             <p className="text-gray-400 text-sm leading-relaxed">
               Smart task management for teams. Streamline workflows and boost productivity.

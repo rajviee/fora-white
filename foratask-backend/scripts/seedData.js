@@ -1,5 +1,5 @@
 const mongoose = require('mongoose');
-const bcrypt = require('bcrypt');
+const bcrypt = require('bcryptjs');
 const dotenv = require('dotenv');
 
 dotenv.config();
@@ -11,7 +11,7 @@ const Subscription = require('./models/subscription');
 const OrganizationSettings = require('./models/organizationSettings');
 const SalaryConfig = require('./models/salaryConfig');
 
-const MONGO_URI = process.env.MONGO_URI || 'mongodb://127.0.0.1:27017/foratask';
+const MONGO_URI = process.env.MONGO_URI;
 
 const seedData = async () => {
     try {

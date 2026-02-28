@@ -6,11 +6,7 @@ export default defineConfig({
   server: {
     port: 3001,
     proxy: {
-      '/master-admin': {
-        target: 'http://localhost:3000',
-        changeOrigin: true,
-      },
-      '/payment': {
+      '/api': {
         target: 'http://localhost:3000',
         changeOrigin: true,
       }

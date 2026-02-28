@@ -34,10 +34,7 @@ export default function Login() {
       <div className="max-w-md w-full">
         <div className="text-center mb-8">
           <div className="inline-flex items-center gap-3 mb-2">
-            <div className="w-10 h-10 bg-primary rounded-xl flex items-center justify-center">
-              <span className="text-white font-bold text-lg">F</span>
-            </div>
-            <h1 className="text-2xl font-bold text-secondary">ForaTask</h1>
+          <img src="/fora-logo-in-line.svg" alt="Logo"/>
           </div>
           <p className="text-gray-500 text-sm mt-1">Sign in to your account</p>
         </div>

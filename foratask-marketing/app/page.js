@@ -219,9 +219,9 @@ export default function Home() {
               </div>
               <div className="space-y-3">
                 {[
-                  { name: 'Rajvi Shah', time: '9:02 AM', status: 'On Time', color: 'green' },
-                  { name: 'Shubh Patel', time: '9:15 AM', status: 'On Time', color: 'green' },
-                  { name: 'Tushar Dev', time: '9:45 AM', status: 'Late', color: 'amber' },
+                  { name: 'Employee 1', time: '9:02 AM', status: 'On Time', color: 'green' },
+                  { name: 'Employee 2', time: '9:15 AM', status: 'On Time', color: 'green' },
+                  { name: 'Employee 3', time: '9:45 AM', status: 'Late', color: 'amber' },
                 ].map((item, i) => (
                   <div key={i} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
                     <div className="flex items-center gap-3">

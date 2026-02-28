@@ -7,6 +7,7 @@ import Register from './pages/Register';
 import Dashboard from './pages/Dashboard';
 import TaskList from './pages/TaskList';
 import TaskCreate from './pages/TaskCreate';
+import TaskEdit from './pages/TaskEdit';
 import TaskDetail from './pages/TaskDetail';
 import Chat from './pages/Chat';
 import Attendance from './pages/Attendance';
@@ -40,6 +41,7 @@ export default function App() {
             <Route path="tasks" element={<TaskList />} />
             <Route path="tasks/create" element={<TaskCreate />} />
             <Route path="tasks/:id" element={<TaskDetail />} />
+            <Route path="tasks/:id/edit" element={<TaskEdit />} />
             <Route path="chat" element={<Chat />} />
             <Route path="attendance" element={<Attendance />} />
             <Route path="employees" element={<Employees />} />

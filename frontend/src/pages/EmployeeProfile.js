@@ -21,7 +21,7 @@ export default function EmployeeProfile() {
       const [empRes, attRes, salRes] = await Promise.all([
         api.get(`/me/userinfo`).catch(() => ({ data: null })),
         api.get(`/attendance/analytics/${id}`).catch(() => ({ data: null })),
-        api.get(`/salary/${id}`).catch(() => ({ data: null })),
+        api.get(`/salary/records/${id}?year=${new Date().getFullYear()}`).catch(() => ({ data: { success: false } })),
       ]);
 
       // Try to get employee details from emp-list
@@ -44,7 +44,12 @@ export default function EmployeeProfile() {
           halfDay: attData.records?.filter(r => r.status === 'half-day').length || 0,
         });
       }
-      setSalary(salRes.data);
+      
+      if (salRes.data?.success && salRes.data.records?.length > 0) {
+        setSalary(salRes.data.records[0]); // Show latest record
+      } else {
+        setSalary(null);
+      }
     } catch (e) { console.error(e); }
     setLoading(false);
   };

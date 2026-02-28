@@ -32,7 +32,18 @@ const ChatRoom = require('./models/chatRoom');
 const ChatMessage = require('./models/chatMessage');
 const cron = require("node-cron");
 const cors = require('cors');
+const fs = require('fs');
+const path = require('path');
 const app = express();
+
+// Ensure upload directories exist
+const uploadDirs = ['uploads', 'uploads/avatars'];
+uploadDirs.forEach(dir => {
+  if (!fs.existsSync(dir)) {
+    fs.mkdirSync(dir, { recursive: true });
+    console.log(`Created directory: ${dir}`);
+  }
+});
 
 const http = require("http");
 const { Server } = require("socket.io");
@@ -60,7 +71,7 @@ app.use('/api/task', authMiddleware, taskRoute);
 app.use('/api/task-extended', authMiddleware, taskExtendedRoute);
 app.use('/api/uploads', express.static('uploads'));
 app.use('/api/stats', authMiddleware, statsRoute);
-app.use('/api/notifications/', authMiddleware, notificationRoute);
+app.use('/api/notifications', authMiddleware, notificationRoute);
 app.use('/api/reports', authMiddleware, reportRoute);
 app.use('/api/payment', paymentRoute);
 app.use('/api/master-admin', masterAdminRoute);
@@ -70,7 +81,7 @@ app.use('/api/attendance', attendanceRoute);
 app.use('/api/organization-settings', organizationSettingsRoute);
 app.use('/api/salary', salaryRoute);
 app.use('/api/leave', leaveRoute);
-app.use('/api/', authMiddleware, adminRoute);
+app.use('/api', authMiddleware, adminRoute);
 
 // Global references for socket.io
 global.io = io;
@@ -517,7 +528,7 @@ mongoose.connect(MONGO_URI).then(async () => {
   await seedMasterAdmin();
   
   server.listen(PORT, () => {
-    console.log('Server running on 3000');
+    console.log(`Server running on ${PORT}`);
   })
 }).catch((err) => {
   console.log(err);

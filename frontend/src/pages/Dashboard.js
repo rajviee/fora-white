@@ -38,11 +38,11 @@ export default function Dashboard() {
 
       // Build graph data
       const gd = graphRes.data;
-      if (gd?.completedByMonth || gd?.incompleteByMonth) {
-        setGraphData(MONTHS.map((m, i) => ({
-          name: m,
-          Completed: gd.completedByMonth?.[i] || 0,
-          Incomplete: gd.incompleteByMonth?.[i] || 0,
+      if (Array.isArray(gd)) {
+        setGraphData(gd.map(item => ({
+          name: MONTHS[item.month - 1] || `M${item.month}`,
+          Completed: item.completed,
+          Incomplete: item.incomplete,
         })));
       } else {
         setGraphData(MONTHS.map(m => ({ name: m, Completed: 0, Incomplete: 0 })));

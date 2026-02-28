@@ -862,9 +862,9 @@ const getTaskList = async (req, res) => {
 }
 
 const deleteDocument = async (req, res) => {
-    docId = req.params.docId;
-    userId = req.user.id;
-    taskId = req.params.id;
+    const docId = req.params.docId;
+    const userId = req.user.id;
+    const taskId = req.params.id;
     const task = await Task.findById(taskId);
     if (!task) return res.status(404).json({ message: "Task not found" });
     // find document to delete
@@ -891,7 +891,7 @@ const editTask = async (req, res) => {
         const taskId = req.params.id;
         const userId = new mongoose.Types.ObjectId(req.user.id);
         const role = req.user.role;
-        const task = await Task.findOne({ _id: taskId });
+        const task = await Task.findOne({ _id: taskId, company: req.user.company });
 
         if (!task) {
             return res.status(404).json({
@@ -905,12 +905,14 @@ const editTask = async (req, res) => {
         const isSelfTask = task.isSelfTask;
         const isAssignee = task.assignees?.map(String).includes(userId.toString());
         const isObserver = task.observers?.map(String).includes(userId.toString());
+        const isCreator = task.createdBy?.toString() === userId.toString();
         const isAdmin = (role === 'admin');
         console.log('going to edit task')
         const filteredUpdate = {};
-        console.log('isSelfTask', isSelfTask, 'isAssignee', isAssignee, 'isAdmin', isAdmin)
+        console.log('isSelfTask', isSelfTask, 'isAssignee', isAssignee, 'isAdmin', isAdmin, 'isCreator', isCreator)
+        
         // Determine allowed fields
-        if (isSelfTask || isAdmin || isObserver) {
+        if (isSelfTask || isAdmin || isObserver || isCreator) {
             allowedFields = [
                 "title",
                 "description",
@@ -922,7 +924,8 @@ const editTask = async (req, res) => {
                 "documents",
                 "deleteDocuments"
             ];
-        } else if (!isObserver && !isAdmin && isAssignee) {
+        } else if (isAssignee) {
+            // Pure assignee can only update status and add documents
             allowedFields = ['status', 'documents'];
         } else {
             return res.status(403).json({ message: "You are not allowed to update this task" });
@@ -1003,8 +1006,8 @@ const editTask = async (req, res) => {
                     break;
 
                 case "deleteDocuments":
-                    // Only admin or observer can delete documents
-                    if (!isAdmin && !isObserver) {
+                    // Only admin, observer or creator can delete documents
+                    if (!isAdmin && !isObserver && !isCreator) {
                         return res.status(403).json({
                             message: "You don't have permission to delete documents"
                         });
@@ -1113,12 +1116,13 @@ const editTask = async (req, res) => {
 
 
         // Check if task should be converted to self task or regular task
+        // We check against the task creator, not the current editor
         let willBeSelfTask = false;
         if (
             finalAssignees.length === 1 &&
             finalObservers.length === 1 &&
             finalAssignees[0].toString() === finalObservers[0].toString() &&
-            finalAssignees[0].toString() === userId.toString()
+            finalAssignees[0].toString() === task.createdBy.toString()
         ) {
             filteredUpdate.isSelfTask = true;
             willBeSelfTask = true;
@@ -1175,8 +1179,9 @@ const editTask = async (req, res) => {
         const duplicateWarning = filteredUpdate._duplicateWarning;
         delete filteredUpdate._duplicateWarning;
 
-        // Check if there are any fields to update
-        if (Object.keys(filteredUpdate).filter(k => !k.startsWith('_')).length === 0) {
+        // Check if there are any fields to update (excluding isSelfTask which might be redundant)
+        const updateKeys = Object.keys(filteredUpdate).filter(k => !k.startsWith('_'));
+        if (updateKeys.length === 0) {
             return res.status(400).json({
                 message: "No valid fields to update"
             });
@@ -1195,11 +1200,14 @@ const editTask = async (req, res) => {
             });
         }
         let taskObj = updatedTask.toObject();
+        
+        // Response masking: if the user is an assignee but not an observer/admin,
+        // they should see "Completed" instead of "For Approval"
         if (
             taskObj.status === "For Approval" &&
             !isAdmin &&
-            !isObserver &&
-            isAssignee
+            !updatedTask.observers.map(String).includes(userId.toString()) &&
+            updatedTask.assignees.map(String).includes(userId.toString())
         ) {
             taskObj.status = "Completed";
         }
@@ -1211,7 +1219,6 @@ const editTask = async (req, res) => {
             const users = await User.find(
                 {
                     _id: { $in: newlyAddedUsers },
-                    // expoPushToken: { $nin: [null, ""] }
                 },
                 { expoPushToken: 1 }
             );

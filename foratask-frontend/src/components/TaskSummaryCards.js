@@ -42,7 +42,7 @@ const TaskSummaryCards = ({ reportType,fromDate, toDate}) => {
     );
   }
 
-  const { totalTasks, completedTasks, inProgressTasks, pendingTasks, overdueTasks } = data;
+  const { totalTasks, completedTasks, inProgressTasks, pendingTasks, overdueTasks, forApprovalTasks } = data;
 
   const cards = [
     {
@@ -72,6 +72,13 @@ const TaskSummaryCards = ({ reportType,fromDate, toDate}) => {
       percentage: totalTasks > 0 ? Math.round((overdueTasks / totalTasks) * 100) : 0,
       color: '#103362CC',
       bgColor: '#fee2e2'
+    },
+    {
+      title: 'For Approval',
+      value: forApprovalTasks,
+      percentage: totalTasks > 0 ? Math.round((forApprovalTasks / totalTasks) * 100) : 0,
+      color: '#8B5CF6CC',
+      bgColor: '#ede9fe'
     }
   ];
 
@@ -120,12 +127,12 @@ const TaskSummaryCards = ({ reportType,fromDate, toDate}) => {
 
   return (
     <View className="py-4">
-      {/* Grid: 4 columns on laptop, 2 on tablet, 1 on mobile */}
+      {/* Grid: 5 columns on laptop, 2 on tablet, 1 on mobile */}
       <View className="flex-row flex-wrap -mx-2">
         {cards.map((card, index) => (
           <View 
             key={index}
-            className="w-full sm:w-1/2 lg:w-1/4 px-2"
+            className="w-full sm:w-1/2 lg:w-1/5 px-2"
           >
             <TaskCard {...card} />
           </View>

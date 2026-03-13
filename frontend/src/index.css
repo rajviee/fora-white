@@ -2,6 +2,15 @@
 @tailwind components;
 @tailwind utilities;
 
+.fora-card {
+  @apply border border-black/50;
+}
+
+* {
+  -webkit-tap-highlight-color: transparent;
+  outline: none !important;
+}
+
 * {
   margin: 0;
   padding: 0;

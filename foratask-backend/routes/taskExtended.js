@@ -14,7 +14,9 @@ const {
     approveLocation,
     approveAllLocations,
     addLocations,
-    clearLocations
+    clearLocations,
+    updateLocation,
+    deleteLocation
 } = require('../controllers/taskLocationController');
 const authMiddleware = require('../middleware/authMiddleware');
 const upload = require('../middleware/uploadMiddleware');
@@ -34,6 +36,8 @@ router.get('/:taskId/timeline', getTaskTimeline);
 router.post('/:taskId/locations', addLocations);
 router.delete('/:taskId/locations', clearLocations);
 router.get('/:taskId/locations', getTaskLocations);
+router.patch('/:taskId/locations/:locationId', updateLocation);
+router.delete('/:taskId/locations/:locationId', deleteLocation);
 router.patch('/:taskId/locations/:locationId/progress', upload.array('file', 3), updateLocationProgress);
 router.post('/:taskId/locations/:locationId/attendance', markAttendanceAtLocation);
 router.post('/:taskId/locations/:locationId/approve', approveLocation);

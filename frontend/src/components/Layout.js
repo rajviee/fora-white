@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Outlet, NavLink, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../AuthContext';
 import api from '../api';
+import { getImageUrl, formatTime } from '../utils';
 
 const navItems = [
   { path: '/dashboard', label: 'Dashboard', icon: 'fa-solid fa-th-large' },
@@ -9,6 +10,7 @@ const navItems = [
   { path: '/chat', label: 'Discussion', icon: 'fa-solid fa-comment-dots' },
   { path: '/reports', label: 'Reports', icon: 'fa-solid fa-file-alt' },
   { path: '/employees', label: 'Employees', icon: 'fa-solid fa-users' },
+  { path: '/notes', label: 'My Notes', icon: 'fa-solid fa-note-sticky' },
   { path: '/settings', label: 'Settings', icon: 'fa-solid fa-cog' },
 ];
 
@@ -18,28 +20,36 @@ export default function Layout() {
   const location = useLocation();
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [userInfo, setUserInfo] = useState(null);
+  const [orgSettings, setOrgSettings] = useState(null);
+  const [currentTime, setCurrentTime] = useState(new Date());
   
   // Search state
   const [searchQuery, setSearchQuery] = useState('');
   const [searchResults, setSearchResults] = useState([]);
   const [searchOpen, setSearchOpen] = useState(false);
-  
   // Notifications state
   const [notifications, setNotifications] = useState([]);
   const [unreadCount, setUnreadCount] = useState(0);
-  const [notifOpen, setNotifOpen] = useState(false);
 
   useEffect(() => {
     api.get('/me/userinfo').then(r => setUserInfo(r.data)).catch(() => {});
+    api.get('/organization-settings').then(r => setOrgSettings(r.data?.settings)).catch(() => {});
     loadNotifications();
     const interval = setInterval(loadNotifications, 60000); // Polling every minute
-    return () => clearInterval(interval);
+    
+    const clockInterval = setInterval(() => {
+      setCurrentTime(new Date());
+    }, 1000);
+
+    return () => {
+      clearInterval(interval);
+      clearInterval(clockInterval);
+    };
   }, []);
 
   useEffect(() => {
     setSidebarOpen(false);
     setSearchOpen(false);
-    setNotifOpen(false);
   }, [location.pathname]);
 
   const loadNotifications = async () => {
@@ -54,19 +64,29 @@ export default function Layout() {
   };
 
   const handleNotifClick = () => {
-    setNotifOpen(!notifOpen);
-    setSearchOpen(false);
-    if (!notifOpen && unreadCount > 0) {
-      setTimeout(loadNotifications, 1000);
-    }
+    navigate('/notifications');
   };
 
   const handleSearch = async (val) => {
     setSearchQuery(val);
-    if (val.length > 2) {
+    if (val.length > 1) {
       try {
-        const res = await api.get(`/task/search?q=${val}`);
-        setSearchResults(res.data?.results || []);
+        const isEmpPage = location.pathname.startsWith('/employees');
+        const res = await api.get(isEmpPage ? `/emp-list?search=${val}` : `/task/search?q=${val}`);
+        
+        let results = [];
+        if (isEmpPage) {
+          results = (res.data?.employees || []).map(e => ({
+            _id: e._id,
+            title: `${e.firstName} ${e.lastName}`,
+            description: e.designation,
+            type: 'employee'
+          }));
+        } else {
+          results = (res.data?.results || []).map(r => ({ ...r, type: 'task' }));
+        }
+        
+        setSearchResults(results);
         setSearchOpen(true);
         setNotifOpen(false);
       } catch (e) { console.error(e); }
@@ -75,10 +95,15 @@ export default function Layout() {
     }
   };
 
-  const handleSearchItemClick = (taskId) => {
+  const handleSearchItemClick = (item) => {
     setSearchOpen(false);
+    setSearchResults([]);
     setSearchQuery('');
-    navigate(`/tasks/${taskId}`);
+    if (item.type === 'employee') {
+      navigate(`/employees/${item._id}`);
+    } else {
+      navigate(`/tasks/${item._id}`);
+    }
   };
 
   const handleLogout = () => { logout(); navigate('/login'); };
@@ -102,21 +127,26 @@ export default function Layout() {
 
         {/* Nav */}
         <nav className="flex-1 px-3 mt-2 space-y-0.5" data-testid="sidebar-nav">
-          {navItems.map((item) => (
-            <NavLink
-              key={item.path}
-              to={item.path}
-              className={({ isActive }) =>
-                `flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm font-medium transition-all ${
-                  isActive ? 'bg-white/20 text-white' : 'text-white/80 hover:bg-white/10 hover:text-white'
-                }`
-              }
-              data-testid={`nav-${item.label.toLowerCase()}`}
-            >
-              <i className={`${item.icon} w-5 text-center text-sm`} />
-              {item.label}
-            </NavLink>
-          ))}
+          {navItems.map((item) => {
+            // Requirement: Employees page should only be seen by admins
+            if (item.path === '/employees' && user?.role !== 'admin') return null;
+            
+            return (
+              <NavLink
+                key={item.path}
+                to={item.path}
+                className={({ isActive }) =>
+                  `flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm font-medium transition-all ${
+                    isActive ? 'bg-white/20 text-white' : 'text-white/80 hover:bg-white/10 hover:text-white'
+                  }`
+                }
+                data-testid={`nav-${item.label.toLowerCase()}`}
+              >
+                <i className={`${item.icon} w-5 text-center text-sm`} />
+                {item.label}
+              </NavLink>
+            );
+          })}
         </nav>
 
         {/* User section at bottom */}
@@ -164,7 +194,7 @@ export default function Layout() {
                 {searchResults.map((result) => (
                   <button
                     key={result._id}
-                    onClick={() => handleSearchItemClick(result._id)}
+                    onClick={() => handleSearchItemClick(result)}
                     className="w-full px-4 py-3 text-left hover:bg-gray-50 border-b border-gray-50 last:border-0 flex flex-col"
                   >
                     <span className="text-sm font-medium text-secondary truncate">{result.title}</span>
@@ -176,6 +206,12 @@ export default function Layout() {
           </div>
 
           <div className="flex items-center gap-3 ml-auto relative">
+            {/* Clock */}
+            <div className="hidden md:flex flex-col items-end mr-2">
+              <span className="text-sm font-bold text-secondary">{formatTime(currentTime, orgSettings)}</span>
+              <span className="text-[10px] font-medium text-gray-400 uppercase tracking-tight">{orgSettings?.timezone || 'UTC'}</span>
+            </div>
+
             {/* Notification bell */}
             <button 
               onClick={handleNotifClick}
@@ -190,36 +226,10 @@ export default function Layout() {
               )}
             </button>
 
-            {/* Notification Dropdown */}
-            {notifOpen && (
-              <div className="absolute right-0 top-14 w-80 bg-white border border-gray-100 rounded-xl shadow-xl z-50 overflow-hidden" data-testid="notification-dropdown">
-                <div className="px-4 py-3 border-b border-gray-50 flex items-center justify-between">
-                  <h3 className="text-sm font-bold text-secondary">Notifications</h3>
-                  <button onClick={() => setNotifOpen(false)} className="text-gray-400 hover:text-gray-600"><i className="fa-solid fa-xmark text-xs" /></button>
-                </div>
-                <div className="max-h-96 overflow-y-auto">
-                  {notifications.length === 0 ? (
-                    <div className="px-4 py-8 text-center text-gray-400 text-sm">No notifications</div>
-                  ) : (
-                    notifications.map((n, i) => (
-                      <div 
-                        key={i} 
-                        onClick={() => { if(n.taskId) navigate(`/tasks/${n.taskId}`); setNotifOpen(false); }}
-                        className={`px-4 py-3 border-b border-gray-50 last:border-0 hover:bg-gray-50 cursor-pointer ${!n.isRead ? 'bg-primary/5' : ''}`}
-                      >
-                        <p className="text-sm text-secondary leading-snug">{n.message}</p>
-                        <p className="text-[10px] text-gray-400 mt-1">{new Date(n.createdAt).toLocaleString()}</p>
-                      </div>
-                    ))
-                  )}
-                </div>
-              </div>
-            )}
-
             {/* User avatar */}
             <div className="w-9 h-9 rounded-full bg-gray-200 flex items-center justify-center text-sm font-semibold text-secondary overflow-hidden cursor-pointer" data-testid="user-avatar">
               {userInfo?.avatar?.path ? (
-                <img src={userInfo.avatar.path} alt="" className="w-full h-full object-cover" />
+                <img src={getImageUrl(userInfo.avatar.path)} alt="" className="w-full h-full object-cover" />
               ) : (
                 <span>{initials}</span>
               )}
@@ -229,7 +239,7 @@ export default function Layout() {
 
         {/* Page content */}
         <main className="flex-1 overflow-auto p-3 sm:p-4 lg:p-6">
-          <Outlet context={{ userInfo }} />
+          <Outlet context={{ userInfo, orgSettings }} />
         </main>
       </div>
     </div>

@@ -1,10 +1,12 @@
 import React, { useState, useEffect } from 'react';
+import { useOutletContext } from 'react-router-dom';
 import api from '../api';
 import { useAuth } from '../AuthContext';
 import { formatDate, formatDateTime } from '../utils';
 
 export default function Attendance() {
   const { user } = useAuth();
+  const { orgSettings } = useOutletContext();
   const [todayStatus, setTodayStatus] = useState(null);
   const [history, setHistory] = useState([]);
   const [stats, setStats] = useState(null);
@@ -79,7 +81,7 @@ export default function Attendance() {
               <i className="fa-solid fa-right-to-bracket" />
             </div>
             <p className="text-xs text-gray-500">Check In</p>
-            {hasCheckedIn && <p className="text-xs font-medium text-secondary mt-0.5">{formatDateTime(todayStatus.attendance?.checkIn?.time)}</p>}
+            {hasCheckedIn && <p className="text-xs font-medium text-secondary mt-0.5">{formatDateTime(todayStatus.attendance?.checkIn?.time, orgSettings)}</p>}
           </div>
 
           <div className="h-px w-16 bg-gray-200" />
@@ -89,7 +91,7 @@ export default function Attendance() {
               <i className="fa-solid fa-right-from-bracket" />
             </div>
             <p className="text-xs text-gray-500">Check Out</p>
-            {hasCheckedOut && <p className="text-xs font-medium text-secondary mt-0.5">{formatDateTime(todayStatus.attendance?.checkOut?.time)}</p>}
+            {hasCheckedOut && <p className="text-xs font-medium text-secondary mt-0.5">{formatDateTime(todayStatus.attendance?.checkOut?.time, orgSettings)}</p>}
           </div>
         </div>
 
@@ -142,9 +144,9 @@ export default function Attendance() {
             {history.map((record, idx) => (
               <div key={idx} className="flex items-center justify-between p-3 rounded-lg bg-gray-50" data-testid={`attendance-record-${idx}`}>
                 <div>
-                  <p className="text-sm font-medium text-secondary">{formatDate(record.date)}</p>
+                  <p className="text-sm font-medium text-secondary">{formatDate(record.date, orgSettings)}</p>
                   <p className="text-xs text-gray-400">
-                    {record.checkIn?.time ? formatDateTime(record.checkIn.time) : '--'} - {record.checkOut?.time ? formatDateTime(record.checkOut.time) : '--'}
+                    {record.checkIn?.time ? formatDateTime(record.checkIn.time, orgSettings) : '--'} - {record.checkOut?.time ? formatDateTime(record.checkOut.time, orgSettings) : '--'}
                   </p>
                 </div>
                 <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${

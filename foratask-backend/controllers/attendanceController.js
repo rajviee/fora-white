@@ -32,7 +32,7 @@ const checkIn = async (req, res) => {
         let isWithinGeofence = false;
         let officeName = null;
 
-        if (orgSettings) {
+        if (orgSettings && orgSettings.officeLocations && orgSettings.officeLocations.length > 0) {
             const geofenceCheck = orgSettings.isWithinOfficeGeofence(
                 coordinates.latitude, 
                 coordinates.longitude
@@ -42,9 +42,14 @@ const checkIn = async (req, res) => {
                 locationType = 'office';
                 isWithinGeofence = true;
                 officeName = geofenceCheck.office.name;
-            } else if (taskId) {
-                locationType = 'task';
+            } else {
+                // If office locations are set, user MUST be in one of them to check in
+                return res.status(403).json({ 
+                    message: `You must be within ${geofenceCheck.office?.geofenceRadius || 100}m of an office location to check in.` 
+                });
             }
+        } else if (taskId) {
+            locationType = 'task';
         }
 
         // Check if late

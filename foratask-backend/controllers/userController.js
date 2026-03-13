@@ -162,6 +162,10 @@ const updateUser = async (req, res) => {
             break;
 
           case "designation":
+            // Only admin can update designation
+            if (req.user.role !== "admin") {
+              break; 
+            }
             if (value && value.length > 100) {
               return res.status(400).json({
                 message: "Designation cannot exceed 100 characters"
@@ -169,13 +173,18 @@ const updateUser = async (req, res) => {
             }
             updates[field] = value || null;
             break;
+
           case "role":
-            if(value && !['employee','supervisor'].includes(value)){
+            // Only admin can update role
+            if (req.user.role !== "admin") {
+              break;
+            }
+            if (value && !['admin', 'employee', 'supervisor'].includes(value)) {
               return res.status(400).json({
-                message: "Invalid value"
+                message: "Invalid role value"
               });
             }
-            updates[field]=value || "employee";
+            updates[field] = value || "employee";
             break;
 
           default:
@@ -364,6 +373,7 @@ const usersList = async (req, res) => {
       firstName: 1,
       lastName: 1,
       avatar: 1,
+      email: 1,
       _id: 1
     });
 

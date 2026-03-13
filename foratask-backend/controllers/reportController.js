@@ -27,6 +27,9 @@ const adminReportSummaryPills = async (req, res) => {
             return res.status(400).json({ message: "Invalid toDate" });
         }
 
+        if (fromDate) fromDate.setHours(0, 0, 0, 0);
+        if (toDate) toDate.setHours(23, 59, 59, 999);
+
 
         // ✅ NEW: Build date range condition
         const dateCondition = {};
@@ -50,7 +53,8 @@ const adminReportSummaryPills = async (req, res) => {
                     completedTasks: { $sum: { $cond: [{ $eq: ["$status", "Completed"] }, 1, 0] } },
                     inProgressTasks: { $sum: { $cond: [{ $eq: ["$status", "In Progress"] }, 1, 0] } },
                     pendingTasks: { $sum: { $cond: [{ $eq: ["$status", "Pending"] }, 1, 0] } },
-                    overdueTasks: { $sum: { $cond: [{ $eq: ["$status", "Overdue"] }, 1, 0] } }
+                    overdueTasks: { $sum: { $cond: [{ $eq: ["$status", "Overdue"] }, 1, 0] } },
+                    forApprovalTasks: { $sum: { $cond: [{ $eq: ["$status", "For Approval"] }, 1, 0] } }
                 }
             }
         ]);
@@ -60,14 +64,16 @@ const adminReportSummaryPills = async (req, res) => {
             completedTasks,
             inProgressTasks,
             pendingTasks,
-            overdueTasks
+            overdueTasks,
+            forApprovalTasks
         }=result[0]);
 
         res.status(200).json({totalTasks,
             completedTasks,
             inProgressTasks,
             pendingTasks,
-            overdueTasks
+            overdueTasks,
+            forApprovalTasks
         });
 
     } catch (err) {
@@ -97,6 +103,9 @@ const selfReportSummaryPills = async (req, res) => {
             return res.status(400).json({ message: "Invalid toDate" });
         }
 
+        if (fromDate) fromDate.setHours(0, 0, 0, 0);
+        if (toDate) toDate.setHours(23, 59, 59, 999);
+
 
         // ✅ NEW: Build date range condition
         const dateCondition = {};
@@ -121,7 +130,8 @@ const selfReportSummaryPills = async (req, res) => {
                     completedTasks: { $sum: { $cond: [{ $eq: ["$status", "Completed"] }, 1, 0] } },
                     inProgressTasks: { $sum: { $cond: [{ $eq: ["$status", "In Progress"] }, 1, 0] } },
                     pendingTasks: { $sum: { $cond: [{ $eq: ["$status", "Pending"] }, 1, 0] } },
-                    overdueTasks: { $sum: { $cond: [{ $eq: ["$status", "Overdue"] }, 1, 0] } }
+                    overdueTasks: { $sum: { $cond: [{ $eq: ["$status", "Overdue"] }, 1, 0] } },
+                    forApprovalTasks: { $sum: { $cond: [{ $eq: ["$status", "For Approval"] }, 1, 0] } }
                 }
             }
         ]);
@@ -130,14 +140,16 @@ const selfReportSummaryPills = async (req, res) => {
             completedTasks,
             inProgressTasks,
             pendingTasks,
-            overdueTasks
+            overdueTasks,
+            forApprovalTasks
         }=result[0]);
 
         res.status(200).json({totalTasks,
             completedTasks,
             inProgressTasks,
             pendingTasks,
-            overdueTasks
+            overdueTasks,
+            forApprovalTasks
         });
 
     } catch (err) {

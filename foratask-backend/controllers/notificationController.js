@@ -124,7 +124,10 @@ const getAllNotifications = async (req, res) => {
     console.log(req.user.company, '- req.user.company')
     console.log(userId, '- req.user.id')
     const companyId = req.user.company;
-    const notifications = await Notification.find({ userId }).sort({ createdAt: -1 });
+    const notifications = await Notification.find({ userId })
+      .populate('senderId', 'firstName lastName avatar')
+      .populate('taskId', 'title')
+      .sort({ createdAt: -1 });
     await Notification.updateMany(
       { userId, isRead: false, company: companyId }, // filter
       { $set: { isRead: true } } // update

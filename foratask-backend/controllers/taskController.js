@@ -216,7 +216,7 @@ const getTask = async (req, res) => {
     try {
         const taskId = req.params.id;
         if (req.user.role == "admin") {
-            const task = await Task.findById({ _id: taskId }, { notification: 0 }).populate("assignees", "firstName lastName avatar").populate("observers", "firstName lastName avatar").populate({ path: "documents.uploadedBy", select: "firstName lastName avatar" });
+            const task = await Task.findById({ _id: taskId }, { notification: 0 }).populate("assignees", "firstName lastName avatar.path").populate("observers", "firstName lastName avatar.path").populate({ path: "documents.uploadedBy", select: "firstName lastName avatar.path" });
             if (!task) return res.status(404).json({ message: 'Task not found' });
             return res.status(200).json(task);
         }
@@ -228,7 +228,7 @@ const getTask = async (req, res) => {
                 { observers: req.user.id },
                 { createdBy: req.user.id }
             ]
-        }, { notification: 0 }).populate("assignees", "firstName lastName avatar").populate("observers", "firstName lastName avatar").populate({ path: "documents.uploadedBy", select: "firstName lastName avatar" });
+        }, { notification: 0 }).populate("assignees", "firstName lastName avatar.path").populate("observers", "firstName lastName avatar.path").populate({ path: "documents.uploadedBy", select: "firstName lastName avatar.path" });
 
         if (!task) {
             return res.status(403).json({ message: 'Access denied' });
@@ -683,6 +683,9 @@ const getTaskList = async (req, res) => {
             return res.status(400).json({ message: "Invalid toDate" });
         }
 
+        if (fromDate) fromDate.setHours(0, 0, 0, 0);
+        if (toDate) toDate.setHours(23, 59, 59, 999);
+
 
         // ✅ NEW: Build date range condition
         const dateCondition = {};
@@ -722,7 +725,7 @@ const getTaskList = async (req, res) => {
                     $sort: {
                         statusOrder: 1,
                         priorityOrder: 1,
-                        dueDateTime: 1,
+                        dueDateTime: -1,
                     }
                 },
 
@@ -762,7 +765,7 @@ const getTaskList = async (req, res) => {
                     $sort: {
                         statusOrder: 1,
                         priorityOrder: 1,
-                        dueDateTime: 1,
+                        dueDateTime: -1,
                     }
                 },
                 { $project: selectOptions },
@@ -816,7 +819,7 @@ const getTaskList = async (req, res) => {
                 $sort: {
                     statusOrder: 1,
                     priorityOrder: 1,
-                    dueDateTime: 1,
+                    dueDateTime: -1,
                 }
             },
             {
@@ -1297,7 +1300,8 @@ const searchTasks = async (req, res) => {
         if (role !== "admin") {
             match.$or = [
                 { assignees: userId },
-                { observers: userId }
+                { observers: userId },
+                { createdBy: userId }
             ];
         }
 

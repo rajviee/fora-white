@@ -265,6 +265,9 @@ const getEmployeeTasks = async (req, res) => {
             return res.status(400).json({ message: "Invalid toDate" });
         }
 
+        if (fromDate) fromDate.setHours(0, 0, 0, 0);
+        if (toDate) toDate.setHours(23, 59, 59, 999);
+
 
         // ✅ NEW: Build date range condition
         const dateCondition = {};

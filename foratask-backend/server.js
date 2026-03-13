@@ -20,6 +20,7 @@ const organizationSettingsRoute = require('./routes/organizationSettings');
 const salaryRoute = require('./routes/salary');
 const leaveRoute = require('./routes/leave');
 const taskExtendedRoute = require('./routes/taskExtended');
+const noteRoute = require('./routes/note');
 
 const { sendBulkPushNotifications } = require('./controllers/notificationController');
 const { seedMasterAdmin } = require('./controllers/masterAdminController');
@@ -81,6 +82,7 @@ app.use('/api/attendance', attendanceRoute);
 app.use('/api/organization-settings', organizationSettingsRoute);
 app.use('/api/salary', salaryRoute);
 app.use('/api/leave', leaveRoute);
+app.use('/api/notes', noteRoute);
 app.use('/api', authMiddleware, adminRoute);
 
 // Global references for socket.io

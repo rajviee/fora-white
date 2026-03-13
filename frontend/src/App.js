@@ -15,6 +15,9 @@ import Employees from './pages/Employees';
 import EmployeeProfile from './pages/EmployeeProfile';
 import Reports from './pages/Reports';
 import Settings from './pages/Settings';
+import Notes from './pages/Notes';
+import NoteDetail from './pages/NoteDetail';
+import Notifications from './pages/Notifications';
 
 function PrivateRoute({ children }) {
   const { user, loading } = useAuth();
@@ -48,6 +51,9 @@ export default function App() {
             <Route path="employees/:id" element={<EmployeeProfile />} />
             <Route path="reports" element={<Reports />} />
             <Route path="settings" element={<Settings />} />
+            <Route path="notes" element={<Notes />} />
+            <Route path="notes/:id" element={<NoteDetail />} />
+            <Route path="notifications" element={<Notifications />} />
           </Route>
         </Routes>
       </BrowserRouter>

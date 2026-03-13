@@ -48,7 +48,7 @@ const organizationSettingsSchema = new mongoose.Schema({
             latitude: { type: Number, required: true },
             longitude: { type: Number, required: true }
         },
-        geofenceRadius: { type: Number, default: 300 }, // meters
+        geofenceRadius: { type: Number, default: 100 }, // meters
         isPrimary: { type: Boolean, default: false }
     }],
     // Attendance Settings
@@ -64,7 +64,16 @@ const organizationSettingsSchema = new mongoose.Schema({
         paidLeavesPerMonth: { type: Number, default: 1.5 },
         carryForwardLimit: { type: Number, default: 5 },
         allowHalfDay: { type: Boolean, default: true }
-    }
+    },
+    // Default Salary Breakdown Template (Percentages of Total)
+    defaultSalaryBreakdown: [{
+        name: { type: String, required: true },
+        percentage: { type: Number, default: 0 }
+    }],
+    // Time and Date Preferences
+    timezone: { type: String, default: 'UTC' },
+    dateFormat: { type: String, enum: ['DD/MM/YY', 'MM/DD/YY'], default: 'DD/MM/YY' },
+    timeFormat: { type: String, enum: ['12h', '24h'], default: '12h' }
 }, {
     timestamps: true
 });

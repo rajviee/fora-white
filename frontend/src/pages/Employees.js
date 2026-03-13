@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, Navigate } from 'react-router-dom';
 import api from '../api';
 import { useAuth } from '../AuthContext';
 
@@ -8,31 +8,38 @@ export default function Employees() {
   const [employees, setEmployees] = useState([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
+  const [debouncedSearch, setDebouncedSearch] = useState('');
   const [showAdd, setShowAdd] = useState(false);
   const [form, setForm] = useState({ firstName: '', lastName: '', email: '', password: '', role: 'employee', designation: '', contactNumber: '' });
   const [addLoading, setAddLoading] = useState(false);
   const [error, setError] = useState('');
 
-  useEffect(() => { loadEmployees(); }, []);
+  // Debounce search input
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedSearch(search);
+    }, 500);
+    return () => clearTimeout(timer);
+  }, [search]);
 
-  const loadEmployees = async () => {
+  useEffect(() => { 
+    if (user?.role === 'admin') {
+      loadEmployees(debouncedSearch); 
+    }
+  }, [user, debouncedSearch]);
+
+  const loadEmployees = async (q = '') => {
+    setLoading(true);
     try {
-      if (user?.role === 'admin') {
-        const [empRes, infoRes] = await Promise.all([
-          api.get('/emp-list?perPage=100'),
-          api.get('/me/userinfo'),
-        ]);
-        const emps = empRes.data?.employees || [];
-        const admin = infoRes.data;
-        if (admin && !emps.some(e => e._id === admin._id)) emps.unshift(admin);
-        setEmployees(emps);
-      } else {
-        const res = await api.get('/me/usersList');
-        setEmployees(res.data || []);
-      }
+      const res = await api.get(`/emp-list?perPage=100&search=${q}`);
+      setEmployees(res.data?.employees || []);
     } catch (e) { console.error(e); }
     setLoading(false);
   };
+
+  if (user?.role !== 'admin') {
+    return <Navigate to="/dashboard" replace />;
+  }
 
   const handleAdd = async (e) => {
     e.preventDefault();
@@ -42,20 +49,15 @@ export default function Employees() {
       await api.post('/add-employee', form);
       setShowAdd(false);
       setForm({ firstName: '', lastName: '', email: '', password: '', role: 'employee', designation: '', contactNumber: '' });
-      loadEmployees();
+      loadEmployees(debouncedSearch);
     } catch (err) {
       setError(err.response?.data?.message || 'Failed to add employee');
     }
     setAddLoading(false);
   };
 
-  const filtered = employees.filter(e => {
-    if (!search) return true;
-    const q = search.toLowerCase();
-    return `${e.firstName} ${e.lastName}`.toLowerCase().includes(q) ||
-      e.email?.toLowerCase().includes(q) ||
-      e.designation?.toLowerCase().includes(q);
-  });
+  // With server-side search, we use the employees list directly
+  const filtered = employees;
 
   return (
     <div className="animate-fade-in" data-testid="employees-page">

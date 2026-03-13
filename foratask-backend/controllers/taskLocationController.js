@@ -65,57 +65,67 @@ const getTaskLocations = async (req, res) => {
 // Update location progress
 const updateLocationProgress = async (req, res) => {
     try {
-        console.log('UpdateLocationProgress started', { params: req.params, body: req.body, fileCount: req.files?.length });
+        console.log('--- UPDATE LOCATION PROGRESS START ---');
         const { taskId, locationId } = req.params;
         const { status, remarks, geotag } = req.body;
         const userId = req.user.id;
         const companyId = req.user.company;
 
+        console.log(`Task: ${taskId}, Location: ${locationId}, Status: ${status}`);
+
         // Robust ID validation
         if (!mongoose.Types.ObjectId.isValid(taskId) || !mongoose.Types.ObjectId.isValid(locationId)) {
-            console.log('Invalid IDs provided');
+            console.log('Error: Invalid IDs');
             return res.status(400).json({ message: 'Invalid Task or Location ID' });
         }
 
         // Verify task access
-        const task = await Task.findOne({ _id: taskId, company: companyId });
-        if (!task) {
-            console.log('Task not found or company mismatch');
+        console.log('Fetching fresh task data...');
+        const freshTask = await Task.findOne({ _id: taskId, company: companyId });
+        if (!freshTask) {
+            console.log('Error: Task not found or company mismatch');
             return res.status(404).json({ message: 'Task not found' });
         }
 
         // Check if user is assignee
-        if (!task.assignees.map(a => a.toString()).includes(userId)) {
-            console.log('User not authorized as assignee');
+        console.log('Verifying assignee status...');
+        if (!freshTask.assignees.map(a => a.toString()).includes(userId)) {
+            console.log('Error: Unauthorized assignee');
             return res.status(403).json({ message: 'Only assignees can update location progress' });
         }
 
+        console.log('Fetching location details...');
         const location = await TaskLocation.findOne({ _id: locationId, task: taskId });
         if (!location) {
-            console.log('Location not found for this task');
+            console.log('Error: Location not found for this task');
             return res.status(404).json({ message: 'Location not found' });
         }
 
         // Requirement: Geotagged picture is required for every update
         if (!req.files || req.files.length === 0) {
+            console.log('Error: No files uploaded');
             return res.status(400).json({ message: 'A geotagged picture is required for every update' });
         }
 
         // Parse geotag if string
+        console.log('Parsing geotag data...');
         let parsedGeotag = geotag;
         if (typeof geotag === 'string') {
             try { 
                 parsedGeotag = JSON.parse(geotag); 
             } catch (e) {
+                console.log('Error: Failed to parse geotag string');
                 return res.status(400).json({ message: 'Invalid geotag format' });
             }
         }
 
         if (!parsedGeotag || parsedGeotag.latitude === undefined || parsedGeotag.longitude === undefined) {
+            console.log('Error: Geotag coordinates missing');
             return res.status(400).json({ message: 'Geotag (latitude and longitude) is required' });
         }
 
         // Handle file attachments
+        console.log('Processing file attachments...');
         const attachments = req.files.map(file => ({
             filename: file.filename,
             originalName: file.originalname,
@@ -145,17 +155,24 @@ const updateLocationProgress = async (req, res) => {
 
         // Update location status
         if (status) {
+            console.log(`Updating location status to: ${status}`);
             const previousStatus = location.status;
             location.status = status;
 
             if (status === 'In Progress' && !location.startedAt) {
                 location.startedAt = new Date();
+                // Automatically update task status to 'In Progress' if it's currently Pending or Overdue
+                if (freshTask.status === 'Pending' || freshTask.status === 'Overdue') {
+                    console.log('Transitioning task status to In Progress...');
+                    await Task.findByIdAndUpdate(taskId, { status: 'In Progress' });
+                }
             } else if (status === 'Completed') {
                 location.completedAt = new Date();
             }
 
             // Add timeline entry
             try {
+                console.log('Recording timeline entry...');
                 await TaskTimeline.addEntry(taskId, companyId, 
                     status === 'Completed' ? 'location_completed' : 'location_update', 
                     userId, {
@@ -169,43 +186,52 @@ const updateLocationProgress = async (req, res) => {
                     }
                 );
             } catch (timelineErr) {
-                console.error('Timeline entry failed', timelineErr.message);
-                // Continue despite timeline failure
+                console.error('Timeline entry failed:', timelineErr.message);
             }
         }
 
+        console.log('Saving location record...');
         await location.save();
 
         // Check if all locations are completed
-        const allLocations = await TaskLocation.find({ task: taskId });
-        const allCompleted = allLocations.length > 0 && allLocations.every(loc => loc.status === 'Completed');
+        console.log('Checking all locations for completion...');
+        const allLocs = await TaskLocation.find({ task: taskId });
+        const allCompleted = allLocs.length > 0 && allLocs.every(l => l.status === 'Completed');
 
-        if (allCompleted && task.status !== 'Completed') {
-            // If self-task, mark as completed, otherwise set to For Approval
-            task.status = task.isSelfTask ? 'Completed' : 'For Approval';
-            await task.save();
+        // Refresh task status if needed
+        if (allCompleted) {
+            console.log('All locations completed. Verifying final task state...');
+            const updatedTask = await Task.findById(taskId);
+            if (updatedTask && updatedTask.status !== 'Completed' && updatedTask.status !== 'For Approval') {
+                const newStatus = updatedTask.isSelfTask ? 'Completed' : 'For Approval';
+                console.log(`Final task status update: ${newStatus}`);
+                await Task.findByIdAndUpdate(taskId, { status: newStatus });
 
-            try {
-                await TaskTimeline.addEntry(taskId, companyId, 
-                    task.isSelfTask ? 'task_completed' : 'approval_requested', 
-                    userId, {
-                        remarks: 'All locations completed'
-                    }
-                );
-            } catch (timelineErr) {
-                console.error('Task completion timeline entry failed', timelineErr.message);
+                try {
+                    await TaskTimeline.addEntry(taskId, companyId, 
+                        updatedTask.isSelfTask ? 'task_completed' : 'approval_requested', 
+                        userId, {
+                            remarks: 'All locations completed'
+                        }
+                    );
+                } catch (timelineErr) {
+                    console.error('Task completion timeline entry failed:', timelineErr.message);
+                }
             }
         }
 
-        await location.populate({ path: 'progressUpdates.updatedBy', select: 'firstName lastName avatar' });
+        console.log('Finalizing response...');
+        await TaskLocation.populate(location, { path: 'progressUpdates.updatedBy', select: 'firstName lastName avatar' });
 
+        console.log('--- UPDATE LOCATION PROGRESS SUCCESS ---');
         res.status(200).json({ success: true, location, taskCompleted: allCompleted });
     } catch (error) {
-        console.error('CRITICAL: Update location progress error:', error);
-        if (error.name === 'ValidationError') {
-            return res.status(400).json({ message: 'Validation failed', details: error.errors });
-        }
-        res.status(500).json({ message: 'Server error: ' + error.message });
+        console.error('--- CRITICAL: UPDATE LOCATION PROGRESS ERROR ---');
+        console.error(error);
+        res.status(500).json({ 
+            message: 'Server error: ' + error.message,
+            stack: process.env.NODE_ENV === 'development' ? error.stack : undefined 
+        });
     }
 };
 
@@ -422,9 +448,9 @@ const addLocations = async (req, res) => {
             return res.status(404).json({ message: 'Task not found' });
         }
 
-        // Requirement: Only allowed if task is Pending
-        if (task.status !== 'Pending') {
-            return res.status(400).json({ message: 'Locations can only be added when task is in Pending state' });
+        // Requirement: Only allowed if task is Pending or Overdue
+        if (task.status !== 'Pending' && task.status !== 'Overdue') {
+            return res.status(400).json({ message: 'Locations can only be added when task is in Pending or Overdue state' });
         }
 
         // Requirement: Assignee and Observer both can add
@@ -456,7 +482,7 @@ const addLocations = async (req, res) => {
     }
 };
 
-// Clear all locations from a task
+// Delete all task locations (already exists, but listed for context)
 const clearLocations = async (req, res) => {
     try {
         const { taskId } = req.params;
@@ -472,9 +498,9 @@ const clearLocations = async (req, res) => {
             return res.status(404).json({ message: 'Task not found' });
         }
 
-        // Requirement: Only allowed if task is Pending
-        if (task.status !== 'Pending') {
-            return res.status(400).json({ message: 'Locations can only be cleared when task is in Pending state' });
+        // Requirement: Only allowed if task is Pending or Overdue
+        if (task.status !== 'Pending' && task.status !== 'Overdue') {
+            return res.status(400).json({ message: 'Locations can only be cleared when task is in Pending or Overdue state' });
         }
 
         // Requirement: Assignee and Observer both can clear
@@ -504,6 +530,92 @@ const clearLocations = async (req, res) => {
     }
 };
 
+// Update a specific location (name/description)
+const updateLocation = async (req, res) => {
+    try {
+        const { taskId, locationId } = req.params;
+        const { name, description } = req.body;
+        const userId = req.user.id;
+        const companyId = req.user.company;
+
+        if (!mongoose.Types.ObjectId.isValid(taskId) || !mongoose.Types.ObjectId.isValid(locationId)) {
+            return res.status(400).json({ message: 'Invalid IDs' });
+        }
+
+        const task = await Task.findOne({ _id: taskId, company: companyId });
+        if (!task) return res.status(404).json({ message: 'Task not found' });
+
+        const isAssignee = task.assignees.map(a => a.toString()).includes(userId);
+        const isObserver = task.observers.map(o => o.toString()).includes(userId);
+        if (!isAssignee && !isObserver && req.user.role !== 'admin') {
+            return res.status(403).json({ message: 'Unauthorized to edit location' });
+        }
+
+        const location = await TaskLocation.findOne({ _id: locationId, task: taskId });
+        if (!location) return res.status(404).json({ message: 'Location not found' });
+
+        if (location.status === 'Completed') {
+            return res.status(400).json({ message: 'Cannot edit a completed location' });
+        }
+
+        if (name) location.name = name;
+        if (description !== undefined) location.description = description;
+        
+        await location.save();
+
+        res.status(200).json({ success: true, location });
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+};
+
+// Delete a specific location
+const deleteLocation = async (req, res) => {
+    try {
+        const { taskId, locationId } = req.params;
+        const userId = req.user.id;
+        const companyId = req.user.company;
+
+        if (!mongoose.Types.ObjectId.isValid(taskId) || !mongoose.Types.ObjectId.isValid(locationId)) {
+            return res.status(400).json({ message: 'Invalid IDs' });
+        }
+
+        const task = await Task.findOne({ _id: taskId, company: companyId });
+        if (!task) return res.status(404).json({ message: 'Task not found' });
+
+        const location = await TaskLocation.findOne({ _id: locationId, task: taskId });
+        if (!location) return res.status(404).json({ message: 'Location not found' });
+
+        if (location.status === 'Completed') {
+            return res.status(400).json({ message: 'Cannot delete a completed location' });
+        }
+
+        const isAssignee = task.assignees.map(a => a.toString()).includes(userId);
+        const isObserver = task.observers.map(o => o.toString()).includes(userId);
+        const isAdmin = req.user.role === 'admin';
+
+        let canDelete = false;
+        if (isAdmin) canDelete = true;
+        else if (isObserver) canDelete = true; // Observer can delete even if In Progress (but not Completed)
+        else if (isAssignee && location.status === 'Pending') canDelete = true; // Assignee only if Pending
+
+        if (!canDelete) {
+            return res.status(403).json({ message: 'Not authorized to delete this location in its current state' });
+        }
+
+        await TaskLocation.deleteOne({ _id: locationId });
+        
+        // Remove from task locations array
+        await Task.findByIdAndUpdate(taskId, {
+            $pull: { locations: locationId }
+        });
+
+        res.status(200).json({ success: true, message: 'Location deleted' });
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+};
+
 module.exports = {
     createTaskLocations,
     getTaskLocations,
@@ -512,5 +624,7 @@ module.exports = {
     approveLocation,
     approveAllLocations,
     addLocations,
-    clearLocations
+    clearLocations,
+    updateLocation,
+    deleteLocation
 };

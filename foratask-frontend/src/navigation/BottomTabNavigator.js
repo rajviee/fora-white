@@ -141,8 +141,10 @@ const screens = [
 
 function getAvatarUrl(user) {
   if (!user?.avatar?.path) return null;
-  const cleanPath = user.avatar.path.replace(/\\/g, "/");
-  return `${process.env.EXPO_PUBLIC_API_URL}/${cleanPath}`;
+  // backend: app.use('/api/uploads', express.static('uploads'));
+  // user.avatar.path: 'uploads/avatars/...'
+  const cleanPath = user.avatar.path.replace(/^uploads[\\\/]/, '').replace(/\\/g, "/");
+  return `${process.env.EXPO_PUBLIC_API_URL}/api/uploads/${cleanPath}`;
 }
 
 /**

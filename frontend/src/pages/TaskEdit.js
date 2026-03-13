@@ -14,7 +14,7 @@ export default function TaskEdit() {
   const [form, setForm] = useState({
     title: '', description: '', priority: 'Medium', taskType: 'Single',
     dueDateTime: '', assignees: [], observers: [], recurringSchedule: '',
-    isRemote: false, isMultiLocation: false,
+    isRemote: false, isMultiLocation: false, status: 'Pending'
   });
   const [locations, setLocations] = useState([]);
   const [locationCount, setLocationCount] = useState(0);
@@ -47,6 +47,7 @@ export default function TaskEdit() {
         recurringSchedule: task.recurringSchedule || '',
         isRemote: task.isRemote || false,
         isMultiLocation: task.isMultiLocation || false,
+        status: task.status || 'Pending'
       });
 
       // Load locations if multi-location
@@ -96,6 +97,7 @@ export default function TaskEdit() {
         assignees: form.assignees,
         observers: form.observers,
         isRemote: form.isRemote,
+        status: form.status,
       };
       // Note: Backend might not support changing taskType or recurringSchedule via editTask in some versions,
       // but let's include them if they are allowed.
@@ -142,8 +144,8 @@ export default function TaskEdit() {
             <textarea value={form.description} onChange={set('description')} rows={3} maxLength={2000} className="w-full px-4 py-2.5 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none resize-none" placeholder="Describe the task..." data-testid="task-description" />
           </div>
 
-          {/* Row: Priority + Due Date */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          {/* Row: Priority + Due Date + Status */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">Priority</label>
               <select value={form.priority} onChange={set('priority')} className="w-full px-4 py-2.5 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none" data-testid="task-priority">
@@ -155,6 +157,16 @@ export default function TaskEdit() {
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">Due Date *</label>
               <input type="datetime-local" value={form.dueDateTime} onChange={set('dueDateTime')} required className="w-full px-4 py-2.5 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none" data-testid="task-due-date" />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Status</label>
+              <select value={form.status} onChange={set('status')} className="w-full px-4 py-2.5 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none" data-testid="task-status">
+                <option value="Pending">Pending</option>
+                <option value="In Progress">In Progress</option>
+                <option value="Completed">Completed</option>
+                <option value="Overdue">Overdue</option>
+                <option value="For Approval">For Approval</option>
+              </select>
             </div>
           </div>
 

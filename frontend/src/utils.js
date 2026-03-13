@@ -1,3 +1,5 @@
+import { getBaseURL } from './api';
+
 export function jwtDecode(token) {
   if (typeof token !== 'string') return null;
   const parts = token.split('.');
@@ -19,38 +21,78 @@ export function jwtDecode(token) {
   }
 }
 
-export function formatDate(date) {
+export function formatDate(date, preferences) {
   if (!date) return '';
-  return new Date(date).toLocaleDateString('en-IN', {
-    day: 'numeric', month: 'short', year: 'numeric',
-  });
+  const prefs = preferences || {};
+  const { timezone = 'UTC', dateFormat = 'DD/MM/YY' } = prefs;
+  
+  const options = {
+    timeZone: timezone,
+    day: '2-digit',
+    month: '2-digit',
+    year: '2-digit',
+  };
+
+  const d = new Date(date);
+  if (dateFormat === 'MM/DD/YY') {
+    return d.toLocaleDateString('en-US', options);
+  }
+  return d.toLocaleDateString('en-GB', options);
 }
 
-export function formatDateTime(date) {
+export function formatTime(date, preferences) {
   if (!date) return '';
-  return new Date(date).toLocaleString('en-IN', {
-    day: 'numeric', month: 'short', year: 'numeric',
-    hour: '2-digit', minute: '2-digit',
-  });
+  const prefs = preferences || {};
+  const { timezone = 'UTC', timeFormat = '12h' } = prefs;
+  
+  const options = {
+    timeZone: timezone,
+    hour: '2-digit',
+    minute: '2-digit',
+    hour12: timeFormat === '12h',
+  };
+  
+  return new Date(date).toLocaleTimeString('en-GB', options);
+}
+
+export function formatDateTime(date, preferences) {
+  if (!date) return '';
+  const prefs = preferences || {};
+  const { timezone = 'UTC', dateFormat = 'DD/MM/YY', timeFormat = '12h' } = prefs;
+  
+  const d = new Date(date);
+  const datePart = formatDate(date, prefs);
+  
+  const timeOptions = {
+    timeZone: timezone,
+    hour: '2-digit',
+    minute: '2-digit',
+    hour12: timeFormat === '12h',
+  };
+  
+  const timePart = d.toLocaleTimeString('en-GB', timeOptions);
+  return `${datePart}, ${timePart}`;
 }
 
 export function getStatusColor(status) {
+  const base = 'inline-flex items-center justify-center w-24 px-0 py-1.5 rounded-lg text-xs font-medium capitalize tracking-wider';
   switch (status) {
-    case 'Completed': return 'bg-emerald-100 text-emerald-700';
-    case 'In Progress': return 'bg-blue-100 text-blue-700';
-    case 'Pending': return 'bg-amber-100 text-amber-700';
-    case 'Overdue': return 'bg-red-100 text-red-700';
-    case 'For Approval': return 'bg-purple-100 text-purple-700';
-    default: return 'bg-gray-100 text-gray-700';
+    case 'Completed': return `${base} bg-emerald-100 text-emerald-700`;
+    case 'In Progress': return `${base} bg-blue-100 text-blue-700`;
+    case 'Pending': return `${base} bg-amber-100 text-amber-700`;
+    case 'Overdue': return `${base} bg-red-100 text-red-700`;
+    case 'For Approval': return `${base} bg-purple-100 text-purple-700`;
+    default: return `${base} bg-gray-100 text-gray-700`;
   }
 }
 
 export function getPriorityColor(priority) {
+  const base = 'inline-flex items-center justify-center w-20 px-0 py-1.5 rounded-lg text-xs font-medium capitalize tracking-wider border';
   switch (priority) {
-    case 'High': return 'text-red-600';
-    case 'Medium': return 'text-amber-600';
-    case 'Low': return 'text-green-600';
-    default: return 'text-gray-600';
+    case 'High': return `${base} border-[#1360C6] bg-[#1360C6] text-white`;
+    case 'Medium': return `${base} border-[#1360C6]/75 bg-[#1360C6]/75 text-white`;
+    case 'Low': return `${base} border-[#1360C6]/50 bg-[#1360C6]/50 text-white`;
+    default: return `${base} border-gray-100 bg-gray-50 text-gray-600`;
   }
 }
 
@@ -64,4 +106,12 @@ export function timeAgo(date) {
   const days = Math.floor(hours / 24);
   if (days < 7) return `${days}d ago`;
   return formatDate(date);
+}
+
+export function getImageUrl(path) {
+  if (!path || typeof path !== 'string') return '';
+  if (path.startsWith('http')) return path;
+  const baseUrl = getBaseURL();
+  const url = `${baseUrl.replace(/\/$/, '')}/${path.replace(/^\//, '')}`;
+  return url;
 }

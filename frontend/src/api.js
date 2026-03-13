@@ -1,13 +1,18 @@
 import axios from 'axios';
 
 // Get backend URL from environment variables
-const getBaseURL = () => {
+export const getServerURL = () => {
   const envUrl = (process.env.REACT_APP_BACKEND_URL || '').trim();
   if (envUrl) {
-    return envUrl.replace(/\/$/, '') + '/api/';
+    return envUrl.replace(/\/$/, '');
   }
-  // Fallback to relative path if no URL is provided
-  return '/api/';
+  // Fallback to current host if no URL is provided
+  return window.location.origin;
+};
+
+// Get API base URL
+export const getBaseURL = () => {
+  return getServerURL() + '/api/';
 };
 
 const api = axios.create({

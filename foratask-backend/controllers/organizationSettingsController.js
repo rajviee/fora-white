@@ -45,7 +45,11 @@ const updateSettings = async (req, res) => {
             'overtime',
             'tasksRemoteByDefault',
             'attendance',
-            'leave'
+            'leave',
+            'defaultSalaryBreakdown',
+            'timezone',
+            'dateFormat',
+            'timeFormat'
         ];
 
         allowedFields.forEach(field => {

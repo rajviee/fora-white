@@ -47,9 +47,10 @@ const tasksSummary = async (req, res) => {
         const companyId = new mongoose.Types.ObjectId(req.user.company);
 
         const start = new Date();
-        start.setUTCHours(0, 0, 0, 0);
+        start.setHours(0, 0, 0, 0);
         const end = new Date();
-        end.setUTCHours(23, 59, 59, 999);
+        end.setHours(23, 59, 59, 999);
+        console.log(`Filtering tasks between ${start.toISOString()} and ${end.toISOString()}`);
 
         let allTimeTotalTasks = 0,
             allTimeCompletedTasks = 0,
@@ -179,9 +180,10 @@ const todaysTasks = async (req, res) => {
         console.log(userId, role, isSelfTask, page, perPage);
 
         const start = new Date();
-        start.setUTCHours(0, 0, 0, 0); // today 00:00:00
+        start.setHours(0, 0, 0, 0); // today 00:00:00
         const end = new Date();
-        end.setUTCHours(23, 59, 59, 999); // today 23:59:59.999
+        end.setHours(23, 59, 59, 999); // today 23:59:59.999
+        console.log(`Filtering todaysTasks between ${start.toISOString()} and ${end.toISOString()}`);
 
         let taskDetails;
         let totalTasks;

@@ -82,8 +82,10 @@ const validateImageFile = (file, uri) => {
 // 🔹 Normalize avatar path from backend
 function getAvatarUrl(user) {
   if (!user?.avatar?.path) return null;
-  const cleanPath = user.avatar.path.replace(/\\/g, "/");
-  return `${process.env.EXPO_PUBLIC_API_URL}/${cleanPath}`;
+  // backend: app.use('/api/uploads', express.static('uploads'));
+  // user.avatar.path: 'uploads/avatars/...'
+  const cleanPath = user.avatar.path.replace(/^uploads[\\\/]/, '').replace(/\\/g, "/");
+  return `${process.env.EXPO_PUBLIC_API_URL}/api/uploads/${cleanPath}`;
 }
 
 // 🔹 Service for updating user
@@ -96,8 +98,13 @@ const updateUserProfile = async (formData, avatarData) => {
   data.append("lastName", formData.lastName || "");
   data.append("dateOfBirth", formData.dateOfBirth || "");
   data.append("gender", formData.gender || "");
-  data.append("designation", formData.designation || "");
   data.append("contactNumber", formData.contactNumber || "");
+
+  // Limitation: Only admin can update designation and role
+  if (user?.role === "admin") {
+    data.append("designation", formData.designation || "");
+    data.append("role", formData.role || "");
+  }
 
   // Handle avatar upload if there's new avatar data
   if (avatarData?.uri && avatarData?.hasChanged) {
@@ -634,10 +641,10 @@ export default function Profile() {
         <TextInput
           className={`border rounded-lg px-3 py-2 mb-4 text-black ${validationErrors.designation
             ? 'border-red-500 bg-red-50'
-            : editMode ? 'border-gray-300 bg-white' : 'border-gray-300 bg-gray-50'
+            : (editMode && user?.role === 'admin') ? 'border-gray-300 bg-white' : 'border-gray-300 bg-gray-50'
             }`}
           placeholder="Designation"
-          editable={editMode}
+          editable={editMode && user?.role === 'admin'}
           value={form.designation}
           onChangeText={handleDesignationChange}
         />

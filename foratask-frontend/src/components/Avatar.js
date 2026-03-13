@@ -2,9 +2,12 @@ import React from 'react'
 import { Image,View,Text } from 'react-native';
 import api from '../utils/api';
 const getAvatarUrl = (employee) => {
-    if (employee.avatar?.path) {
-        // Adjust this based on your API base URL
-        return `${api.defaults.baseURL}/${employee.avatar.path}`;
+    if (employee?.avatar?.path) {
+        // The backend serves uploads at /api/uploads
+        // and path in DB is 'uploads/avatars/...'
+        // so we remove 'uploads/' from path to avoid /api/uploads/uploads/
+        const cleanPath = employee.avatar.path.replace(/^uploads[\\\/]/, '');
+        return `${api.defaults.baseURL}/api/uploads/${cleanPath}`;
     }
     return null;
 };

@@ -80,8 +80,10 @@ const validateImageFile = (file, uri) => {
 // 🔹 Normalize avatar path from backend
 function getAvatarUrl(avatar) {
   if (!avatar?.path) return null;
-  const cleanPath = avatar.path.replace(/\\/g, "/");
-  return `${process.env.EXPO_PUBLIC_API_URL}/${cleanPath}`;
+  // backend: app.use('/api/uploads', express.static('uploads'));
+  // avatar.path: 'uploads/avatars/...'
+  const cleanPath = avatar.path.replace(/^uploads[\\\/]/, '').replace(/\\/g, "/");
+  return `${process.env.EXPO_PUBLIC_API_URL}/api/uploads/${cleanPath}`;
 }
 
 // 🔹 Service for fetching user info
